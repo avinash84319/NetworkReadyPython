@@ -45,3 +45,27 @@ def divide_variables_in_redis_no_of_hosts(r,variables,no_of_hosts):
             r.set(f"{variable[1:]}${i}",json.dumps(variable_part))
 
     return None
+
+def merge_variables_in_redis_no_of_hosts(r,variables,no_of_hosts):
+    """
+    This function will merge the variables in the given list into the no of hosts given.
+    input:r (redis),variables (list of variables), no_of_hosts (int)
+    output: None, variables printed on terminal
+    """
+    
+    for variable in variables:
+        
+        variable_value = []
+        
+        # merging the variable from the no of hosts
+        for i in range(no_of_hosts):
+            variable_part = r.get(f"{variable[1:]}${i}")
+            variable_part = json.loads(variable_part)
+            variable_value.extend(variable_part)
+
+        print(f"value of {variable} after par execution: {variable_value[:10]} ... ")
+
+        # saving the variable in redis
+        r.set(variable[1:],json.dumps(variable_value))
+
+    return None

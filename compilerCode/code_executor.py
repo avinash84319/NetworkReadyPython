@@ -1,10 +1,11 @@
 """
-This module is responsible for executing the code and returning the $variables.
+This module is responsible for executing the code in different modes.
 """
 
 
 import json
 import requests
+import concurrent.futures
 
 
 def seq_code_execute(r,variables):
@@ -30,15 +31,21 @@ def par_code_execute(code):
 
     return None
 
-def server_par_code_executore(hosts):
+def server_par_code_executor(hosts):
     """
     This function will execute the parallel user code.
     input:hosts list of strings, reads the code from par_code.py
     output:None, output at the desired location
     """
 
-    # executing the code on hosts
-    for i,host in enumerate(hosts):
-        response = requests.post(f"{host}/execute",json={"code":open(f'par_cd/par_code_{i}.py').read()})
+    # executing the code on hosts concurrently
+    
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = [executor.submit(requests.post,f"{host}/execute",json={"code":open(f'par_cd/par_code_{i}.py').read()}) for i,host in enumerate(hosts)]
+        for f in concurrent.futures.as_completed(results):
+            if f.result().status_code == 200:
+                print(f"Code executed successfully at {f.result().url}")
+            else:
+                print(f"Error occured at {f.result().url}")
 
     return None

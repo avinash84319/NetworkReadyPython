@@ -56,7 +56,10 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379, db=0)):
     code_generator.par_code_generator(par_tokens,par_variables,no_of_hosts)
 
     # executing the parallel code using servers on the hosts
-    code_executor.server_par_code_executore(hosts)
+    code_executor.server_par_code_executor(hosts)
+
+    # merge variables from all hosts
+    variable_handler.merge_variables_in_redis_no_of_hosts(r,par_variables,no_of_hosts)
     
 
 if __name__ == "__main__":

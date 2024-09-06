@@ -72,5 +72,9 @@ def par_code_generator(tokens,variables,no_of_hosts):
                 file.write("".join(line_tokens))
                 file.write("\n")
 
+            # writing the code to set the $variables after the code execution
+            for variable in variables:
+                file.write(f"r.set('{str(variable[1:])}${no}',json.dumps({variable[1:]}))\n")
+
 
             

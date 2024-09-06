@@ -10,14 +10,13 @@ import compilerCode.code_verifier as code_verifier
 import compilerCode.variable_handler as variable_handler
 
 
-def compile_run(code=""):
+def compile_run(code="",r=redis.Redis(host='localhost', port=6379, db=0)):
 
     """ 
     This function will compile the given code and run it.
+    imputs: code: str: code to be compiled
+            r: redis object: redis object 
     """
-
-    # connecting to redis
-    r = redis.Redis(host='localhost', port=6379)
 
     # removing comments from the code
     code=code_handler.remove_comments(code)
@@ -56,14 +55,16 @@ def compile_run(code=""):
     # generating the parallel code
     code_generator.par_code_generator(par_tokens,par_variables,no_of_hosts)
 
-    # executing the parallel code
-    code_executor.par_code_execute(no_of_hosts)
+    # executing the parallel code using servers on the hosts
+    code_executor.server_par_code_executore(hosts)
     
 
 if __name__ == "__main__":
     print("Compiler started")
+    #redis
+    red = redis.Redis(host='localhost', port=6379, db=0)
     # Read the input file
     with open('input.txt', 'r',encoding='utf-8') as file:
         input_file = file.read()
-    compile_run(input_file)
+    compile_run(input_file,red)
     

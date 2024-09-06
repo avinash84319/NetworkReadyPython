@@ -9,6 +9,8 @@ packages = [{include = "reddynet_v2"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 redis = "^5.0.8"
+flask = "^3.0.3"
+requests = "^2.32.3"
 
 
 [build-system]

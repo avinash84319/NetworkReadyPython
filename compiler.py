@@ -2,12 +2,12 @@
 This module will run the compiler on the given input file
 """
 import redis
-import code_handler
-import tokenizer
-import code_generator
-import code_executor
-import code_verifier
-import variable_handler
+import compilerCode.code_handler as code_handler
+import compilerCode.tokenizer as tokenizer
+import compilerCode.code_generator as code_generator
+import compilerCode.code_executor as code_executor
+import compilerCode.code_verifier as code_verifier
+import compilerCode.variable_handler as variable_handler
 
 
 def compile_run(code=""):

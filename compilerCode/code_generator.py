@@ -15,7 +15,7 @@ def seq_code_generator(tokens,variables):
             tokens[i][j] = tokens[i][j].replace("$","")
 
     # writing the code to a file to execute
-    with open('seq_code.py', 'w',encoding='utf-8') as file:
+    with open('seq_cd/seq_code.py', 'w',encoding='utf-8') as file:
 
         #writing json import statement
         file.write("import json\n")

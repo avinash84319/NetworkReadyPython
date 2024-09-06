@@ -14,7 +14,7 @@ def seq_code_execute(r,variables):
     """
 
     # executing the code
-    exec("".join(open('seq_code.py').read()))
+    exec("".join(open('seq_cd/seq_code.py').read()))
 
     return None
 

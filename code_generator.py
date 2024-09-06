@@ -54,7 +54,7 @@ def par_code_generator(tokens,variables,no_of_hosts):
     for no in range(no_of_hosts):
 
         # writing the code to a file to execute
-        with open(f'par_code_{no}.py', 'w',encoding='utf-8') as file:
+        with open(f'par_cd/par_code_{no}.py', 'w',encoding='utf-8') as file:
 
             #writing json import statement
             file.write("import json\n")

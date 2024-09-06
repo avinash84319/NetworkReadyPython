@@ -27,6 +27,6 @@ def par_code_execute(no_of_hosts):
 
     # executing the code
     for i in range(no_of_hosts):
-        exec("".join(open(f'par_code_{i}.py').read()))
+        exec("".join(open(f'par_cd/par_code_{i}.py').read()))
 
     return None

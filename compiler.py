@@ -23,43 +23,45 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379, db=0)):
 
 
     # separating the sequential and parallel code
-    hosts, sequential_code, parallel_code = code_handler.separate_code(code)
+    hosts,multi_sequential_code,multi_parallel_code = code_handler.separate_code(code)
 
     # getting the no of hosts
     no_of_hosts = len(hosts)
 
-    # Tokenizing the code
-    seq_tokens = tokenizer.tokenize(sequential_code)
-    par_tokens = tokenizer.tokenize(parallel_code)
+    for sequential_code,parallel_code in zip(multi_sequential_code,multi_parallel_code):
 
-    # Getting the variables used in the code linewise
-    seq_variables_linewise = tokenizer.get_variables(seq_tokens)
-    par_variables_linewise = tokenizer.get_variables(par_tokens)
+        # Tokenizing the code
+        seq_tokens = tokenizer.tokenize(sequential_code)
+        par_tokens = tokenizer.tokenize(parallel_code)
 
-    # Getting the variables used in the code in a list
-    seq_variables = tokenizer.get_variables_list(seq_variables_linewise)
-    par_variables = tokenizer.get_variables_list(par_variables_linewise)
+        # Getting the variables used in the code linewise
+        seq_variables_linewise = tokenizer.get_variables(seq_tokens)
+        par_variables_linewise = tokenizer.get_variables(par_tokens)
 
-    # generating the sequential code
-    code_generator.seq_code_generator(seq_tokens,seq_variables)
+        # Getting the variables used in the code in a list
+        seq_variables = tokenizer.get_variables_list(seq_variables_linewise)
+        par_variables = tokenizer.get_variables_list(par_variables_linewise)
 
-    # executing the sequential code
-    code_executor.seq_code_execute(r,seq_variables)
+        # generating the sequential code
+        code_generator.seq_code_generator(seq_tokens,seq_variables)
 
-    # verify variables to be list
-    code_verifier.verify_dollar_variables(r,seq_variables)
+        # executing the sequential code
+        code_executor.seq_code_execute(r,seq_variables)
 
-    # devide and save variables for each host
-    variable_handler.divide_variables_in_redis_no_of_hosts(r,seq_variables,no_of_hosts)
+        # verify variables to be list
+        code_verifier.verify_dollar_variables(r,seq_variables)
 
-    # generating the parallel code
-    code_generator.par_code_generator(par_tokens,par_variables,no_of_hosts)
+        # devide and save variables for each host
+        variable_handler.divide_variables_in_redis_no_of_hosts(r,seq_variables,no_of_hosts)
 
-    # executing the parallel code using servers on the hosts
-    code_executor.server_par_code_executor(hosts)
+        # generating the parallel code
+        code_generator.par_code_generator(par_tokens,par_variables,no_of_hosts)
 
-    # merge variables from all hosts
-    variable_handler.merge_variables_in_redis_no_of_hosts(r,par_variables,no_of_hosts)
+        # executing the parallel code using servers on the hosts
+        code_executor.server_par_code_executor(hosts)
+
+        # merge variables from all hosts
+        variable_handler.merge_variables_in_redis_no_of_hosts(r,par_variables,no_of_hosts)
     
 
 if __name__ == "__main__":

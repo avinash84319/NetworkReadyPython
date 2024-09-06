@@ -25,6 +25,11 @@ def seq_code_generator(tokens,variables):
         file.write("import redis\n")
         file.write("r = redis.Redis(host='localhost', port=6379)\n")
 
+        # if this is second seq code block then get the variables from redis
+        # checking if the variables are present in redis (this will be not valid for the first seq code block)
+        for variable in variables:
+            file.write(f"{variable[1:]}=json.loads(r.get('{str(variable[1:])}'))\n")
+
         # writing the code
 
         for line_tokens in tokens:

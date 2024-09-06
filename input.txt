@@ -1,15 +1,28 @@
 ***
+# these are host on which servernodes are running
 "http://localhost:5000/",
 "http://localhost:3000/",
 ***
 
 ---
-# this is a comment
+# this is a sequential code
 $a=[x for x in range(10)]
 $a=$a+[4,5,6]
 ---
 
 |||
+# this is a parallel code
 $a=[x*2 for x in $a]
+print($a)
+|||
+
+---
+# this is a sequential code
+$a=[x*2 for x in $a]
+---
+
+|||
+# this is a parallel code
+$a=[x*4 for x in $a]
 print($a)
 |||

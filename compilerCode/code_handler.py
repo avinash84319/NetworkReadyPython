@@ -29,6 +29,9 @@ def separate_code(code):
     code = code.split("\n")
     code = [i for i in code if i]
 
+    multi_sequential_code = []
+    multi_parallel_code = []
+
     sequential_code = []
     parallel_code = []
     hosts = []
@@ -55,6 +58,8 @@ def separate_code(code):
                 continue
 
             if seq == 1:
+                multi_sequential_code.append("\n".join(sequential_code))
+                sequential_code = []
                 seq=0
                 continue
             
@@ -64,6 +69,8 @@ def separate_code(code):
                 continue
 
             if par == 1:
+                multi_parallel_code.append("\n".join(parallel_code))
+                parallel_code = []
                 par=0
                 continue
 
@@ -79,4 +86,4 @@ def separate_code(code):
     # Removing the empty strings and quotes from the hosts
     hosts = [i[1:-1] for i in hosts if i!=""]
 
-    return hosts,"\n".join(sequential_code), "\n".join(parallel_code)
+    return hosts,multi_sequential_code,multi_parallel_code

@@ -1,0 +1,17 @@
+***
+"http://localhost:8080/",
+"http://localhost:8081/",
+"http://localhost:8082/",
+"http://localhost:8083/"
+***
+
+---
+# this is a comment
+$a=[1,2,3]
+$a=$a+[4,5,6]
+---
+
+|||
+$a=$a+[5,4,3]
+print($a)
+|||

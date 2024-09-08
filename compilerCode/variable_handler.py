@@ -62,7 +62,6 @@ def merge_variables_in_redis_no_of_hosts(r,variables,no_of_hosts):
             variable_part = r.get(f"{variable[1:]}${i}")
             variable_part = json.loads(variable_part)
             variable_value.extend(variable_part)
-            print(f"value of {variable} after host {i} execution: {variable_part[:10]} ... ")
 
         print(f"value of {variable} after par execution: {variable_value[:10]} ... ")
 

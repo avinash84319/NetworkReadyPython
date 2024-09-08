@@ -18,14 +18,14 @@ import random
 
 ---
 # this is a sequential code
-$a=[x for x in range(10)]
 _b=2
+$a=[x*_b for x in range(10)]
 ---
 
 |||
 # this is a parallel code
 print(f"this is b {_b}")
-$a=[x*2 for x in $a]
+$a=[x*_b for x in $a]
 _b=_b*2
 |||
 

@@ -42,7 +42,8 @@ def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,im
         # checking if the variables are present in redis (this will be not valid for the first seq code block)
         
         for variable in variables:
-            file.write(f"{variable[1:]}=json.loads(r.get('{str(variable[1:])}'))\n")
+            if r.exists(str(variable[1:])):
+                file.write(f"{variable[1:]}=json.loads(r.get('{str(variable[1:])}'))\n")
 
         # writing the code
 

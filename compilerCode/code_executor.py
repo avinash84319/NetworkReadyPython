@@ -22,7 +22,7 @@ def seq_code_execute(r):
 
 def par_code_execute(code):
     """
-    This function will execute the parallel user code from the server.
+    This function will execute the parallel user code from the server request.
     input:code from the server.
     output:ouput at host terminals.
     """
@@ -46,6 +46,9 @@ def server_par_code_executor(hosts):
             if f.result().status_code == 200:
                 print(f"Code executed successfully at {f.result().url}")
             else:
+                # stop the execution if error occured
                 print(f"Error occured at {f.result().url}")
+                exit()
+                
 
     return None

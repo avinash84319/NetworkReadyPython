@@ -18,10 +18,9 @@ def execute():
     """
     code = request.json.get("code")
 
-    try:
-        code_executor.par_code_execute(code)
-    except Exception as e:
-        return jsonify({"message": f"Error: {e}"})
+    print(code)
+    
+    code_executor.par_code_execute(code)
     
     return jsonify({"message": "Code executed successfully"})
 

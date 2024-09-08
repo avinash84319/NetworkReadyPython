@@ -8,10 +8,10 @@ import requests
 import concurrent.futures
 
 
-def seq_code_execute(r,variables):
+def seq_code_execute(r):
     """
     This function will execute the code and return the $variables.
-    input: r (redis),variables(list of strings), reads the code from seq_code.py
+    input: r (redis),reads the code from seq_code.py
     output: None, variables saved in redis
     """
 

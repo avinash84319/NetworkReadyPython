@@ -19,22 +19,24 @@ import random
 ---
 # this is a sequential code
 $a=[x for x in range(10)]
-$a=$a+[4,5,6]
+$a=$a
+_b=2
 ---
 
 |||
 # this is a parallel code
-$a=[x*2 for x in $a]
+$a=[x*_b for x in $a]
 print($a)
 |||
 
 ---
 # this is a sequential code
-$a=[x*2 for x in $a]
+$a=[x*_b for x in $a]
+_b=_b*2
 ---
 
 |||
 # this is a parallel code
-$a=[x*4 for x in $a]
+$a=[x*_b for x in $a]
 print($a)
 |||

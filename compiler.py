@@ -10,7 +10,7 @@ import compilerCode.code_verifier as code_verifier
 import compilerCode.variable_handler as variable_handler
 
 
-def compile_run(code="",r=redis.Redis(host='localhost', port=6379, db=0)):
+def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
 
     """ 
     This function will compile the given code and run it.
@@ -36,33 +36,37 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379, db=0)):
         par_tokens = tokenizer.tokenize(parallel_code)
 
         # Getting the variables used in the code linewise
-        seq_variables_linewise = tokenizer.get_variables(seq_tokens)
-        par_variables_linewise = tokenizer.get_variables(par_tokens)
+        seq_dollar_variables_linewise,seq_underscore_variables_linewise = tokenizer.get_variables(seq_tokens)
+        par_dollar_variables_linewise,par_underscore_variables_linewise = tokenizer.get_variables(par_tokens)
 
         # Getting the variables used in the code in a list
-        seq_variables = tokenizer.get_variables_list(seq_variables_linewise)
-        par_variables = tokenizer.get_variables_list(par_variables_linewise)
+        seq_dollar_variables = tokenizer.get_variables_list(seq_dollar_variables_linewise)
+        seq_underscore_variables = tokenizer.get_variables_list(seq_underscore_variables_linewise)
+        par_dollar_variables = tokenizer.get_variables_list(par_dollar_variables_linewise)
+        par_underscore_variables = tokenizer.get_variables_list(par_underscore_variables_linewise)
+
 
         # generating the sequential code
-        code_generator.seq_code_generator(seq_tokens,seq_variables,imports_packages)
+        code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages)
 
         # executing the sequential code
-        code_executor.seq_code_execute(r,seq_variables)
-
+        code_executor.seq_code_execute(r)
+        print("Seq Code executed successfully")
+        
         # verify variables to be list
-        code_verifier.verify_dollar_variables(r,seq_variables)
+        code_verifier.verify_dollar_variables(r,seq_dollar_variables)
 
         # devide and save variables for each host
-        variable_handler.divide_variables_in_redis_no_of_hosts(r,seq_variables,no_of_hosts)
+        variable_handler.divide_variables_in_redis_no_of_hosts(r,seq_dollar_variables,no_of_hosts)
 
         # generating the parallel code
-        code_generator.par_code_generator(par_tokens,par_variables,imports_packages,no_of_hosts)
+        code_generator.par_code_generator(par_tokens,par_dollar_variables,par_underscore_variables,imports_packages,no_of_hosts)
 
         # executing the parallel code using servers on the hosts
         code_executor.server_par_code_executor(hosts)
-
+        print("Par Code executed successfully")
         # merge variables from all hosts
-        variable_handler.merge_variables_in_redis_no_of_hosts(r,par_variables,no_of_hosts)
+        variable_handler.merge_variables_in_redis_no_of_hosts(r,par_dollar_variables,no_of_hosts)
     
 
 if __name__ == "__main__":

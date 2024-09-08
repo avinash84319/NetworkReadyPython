@@ -20,12 +20,12 @@ def tokenize(code):
 
     return tokens
 
-def get_variables(tokens):
+def get_symbol_variables(tokens,symbol="$"):
 
     """
     This function will return the variables used in the code
     input: tokens (list of list of strings)
-    output: variables (list of list of strings)
+    output: symbolvariables (list of list of strings)
     """
 
     variables = []
@@ -37,7 +37,7 @@ def get_variables(tokens):
 
         for token in line_tokens:
 
-            if token in ALPHABETS or token in NUMBERS or token=="_" or token=="$":
+            if token in ALPHABETS or token in NUMBERS or token=="_" or token==symbol:
                 stack.append(token)
 
             if token in OPERATORS or token in [" ","\t","\n"]:
@@ -58,10 +58,26 @@ def get_variables(tokens):
     # Removing duplicates
     variables = [ list(set(line_variables)) for line_variables in variables ]
 
-    # Removing the variables which are not starting with "$"
-    variables = [ [ variable for variable in line_variables if variable[0]=="$" ] for line_variables in variables ]
+    # Removing the variables which are not starting with symbol
+    variables = [ [ variable for variable in line_variables if variable[0]==symbol ] for line_variables in variables ]
     
     return variables
+
+def get_variables(tokens):
+
+    """
+    This function will return the variables used in the code
+    input: tokens (list of list of strings)
+    output: $variables (list of list of strings)
+            _variables (list of list of strings)
+    """
+
+    dollor_variables = get_symbol_variables(tokens,symbol="$")
+    underscore_variables = get_symbol_variables(tokens,symbol="_")
+    
+    return dollor_variables,underscore_variables
+
+    
 
 def get_variables_list(variables_linewise):
 

@@ -4,6 +4,18 @@
 "http://localhost:3000/",
 ***
 
+>>>
+#this will be the path to the requirments.txt file in relative
+requirments.txt
+>>>
+
+^^^
+# this will be import statements
+import collections
+import math
+import random
+^^^
+
 ---
 # this is a sequential code
 $a=[x for x in range(10)]

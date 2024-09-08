@@ -22,12 +22,13 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379, db=0)):
     code=code_handler.remove_comments(code)
 
 
-    # separating the sequential and parallel code
-    hosts,multi_sequential_code,multi_parallel_code = code_handler.separate_code(code)
+    # separating the different components in the code
+    hosts,multi_sequential_code,multi_parallel_code,path_to_req,imports_packages = code_handler.separate_code(code)
 
     # getting the no of hosts
     no_of_hosts = len(hosts)
 
+    # loop for each sequential and parallel code pair
     for sequential_code,parallel_code in zip(multi_sequential_code,multi_parallel_code):
 
         # Tokenizing the code
@@ -43,7 +44,7 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379, db=0)):
         par_variables = tokenizer.get_variables_list(par_variables_linewise)
 
         # generating the sequential code
-        code_generator.seq_code_generator(seq_tokens,seq_variables)
+        code_generator.seq_code_generator(seq_tokens,seq_variables,imports_packages)
 
         # executing the sequential code
         code_executor.seq_code_execute(r,seq_variables)
@@ -55,7 +56,7 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379, db=0)):
         variable_handler.divide_variables_in_redis_no_of_hosts(r,seq_variables,no_of_hosts)
 
         # generating the parallel code
-        code_generator.par_code_generator(par_tokens,par_variables,no_of_hosts)
+        code_generator.par_code_generator(par_tokens,par_variables,imports_packages,no_of_hosts)
 
         # executing the parallel code using servers on the hosts
         code_executor.server_par_code_executor(hosts)

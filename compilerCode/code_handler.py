@@ -35,10 +35,14 @@ def separate_code(code):
     sequential_code = []
     parallel_code = []
     hosts = []
+    path_to_req=""
+    imports_packages = []
 
     seq=0
     par=0
     hst=0
+    pth=0
+    ip=0
 
     for line in code:
 
@@ -49,6 +53,24 @@ def separate_code(code):
 
             if hst == 1:
                 hst=0
+                continue
+
+        if line == ">>>":
+            if pth == 0:
+                pth=1
+                continue
+
+            if pth == 1:
+                pth=0
+                continue
+
+        if line == "^^^":
+            if ip == 0:
+                ip=1
+                continue
+
+            if ip == 1:
+                ip=0
                 continue
 
         if line == "---":
@@ -83,7 +105,13 @@ def separate_code(code):
         if par == 1:
             parallel_code.append(line)
 
+        if pth == 1:
+            path_to_req=line
+
+        if ip == 1:
+            imports_packages.append(line)
+
     # Removing the empty strings and quotes from the hosts
     hosts = [i[1:-1] for i in hosts if i!=""]
 
-    return hosts,multi_sequential_code,multi_parallel_code
+    return hosts,multi_sequential_code,multi_parallel_code,path_to_req,"\n".join(imports_packages)

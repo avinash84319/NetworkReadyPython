@@ -1,11 +1,12 @@
 
 
-def seq_code_generator(tokens,variables):
+def seq_code_generator(tokens,variables,imports_packages):
 
     """
     This function will execute the given code
     input: tokens (list of list of strings)
            variables (list of strings)
+           imports_packages (strings)
     output: seq_code.py file with necessary code to execute the given code
     """
 
@@ -16,6 +17,9 @@ def seq_code_generator(tokens,variables):
 
     # writing the code to a file to execute
     with open('seq_cd/seq_code.py', 'w',encoding='utf-8') as file:
+
+        # writing the import statements
+        file.write(imports_packages+"\n")
 
         #writing json import statement
         file.write("import json\n")
@@ -42,11 +46,12 @@ def seq_code_generator(tokens,variables):
             file.write(f"r.set('{str(variables[i][1:])}',json.dumps({variables[i][1:]}))\n")
 
     
-def par_code_generator(tokens,variables,no_of_hosts):
+def par_code_generator(tokens,variables,imports_packages,no_of_hosts):
     """
     This function will execute the given code
     input: tokens (list of list of strings)
            variables (list of strings)
+           imports_packages (strings)
            no_of_hosts (int)
     output: par_code.py file with necessary code to execute the given code
     """
@@ -60,6 +65,9 @@ def par_code_generator(tokens,variables,no_of_hosts):
 
         # writing the code to a file to execute
         with open(f'par_cd/par_code_{no}.py', 'w',encoding='utf-8') as file:
+
+            # writing the import statements
+            file.write(imports_packages+"\n")
 
             #writing json import statement
             file.write("import json\n")

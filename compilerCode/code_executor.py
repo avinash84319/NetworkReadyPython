@@ -20,17 +20,18 @@ def seq_code_execute(r):
 
     return None
 
-def server_par_code_executor(hosts):
+def server_par_code_executor(hosts,path_to_req):
     """
     This function will execute the parallel user code.
     input:hosts list of strings, reads the code from par_code.py
+          path_to_req: string: path to requirements.txt
     output:None, output at the desired location
     """
 
     # executing the code on hosts concurrently by sending the par files to the hosts
     
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = [executor.submit(requests.post,f"{host}/execute",files={'code_file':open(f'par_cd/par_code_0.py','rb')}) for host in hosts]
+        results = [executor.submit(requests.post,f"{host}/execute",files={'code_file':open(f'par_cd/par_code_0.py','rb'),'req_file':open(path_to_req,'rb')}) for host in hosts]
         for f in concurrent.futures.as_completed(results):
             if f.result().status_code == 200:
                 print(f"Code executed successfully at {f.result().url}")

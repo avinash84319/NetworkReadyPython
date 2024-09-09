@@ -8,6 +8,7 @@ import compilerCode.code_generator as code_generator
 import compilerCode.code_executor as code_executor
 import compilerCode.code_verifier as code_verifier
 import compilerCode.variable_handler as variable_handler
+import compilerCode.environment_setup as environment_setup
 
 
 def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
@@ -49,9 +50,14 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
         # generating the sequential code
         code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages)
 
+        # installing the required packages
+        environment_setup.install_packages(path_to_req)
+
         # executing the sequential code
         code_executor.seq_code_execute(r)
-        print("Seq Code executed successfully")
+
+        # removing the installed packages
+        # environment_setup.remove_packages(path_to_req)      #until development same directory is used
         
         # verify variables to be list
         code_verifier.verify_dollar_variables(r,seq_dollar_variables)
@@ -63,8 +69,8 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
         code_generator.par_code_generator(par_tokens,par_dollar_variables,par_underscore_variables,imports_packages,no_of_hosts)
 
         # executing the parallel code using servers on the hosts
-        code_executor.server_par_code_executor(hosts)
-        print("Par Code executed successfully")
+        code_executor.server_par_code_executor(hosts,path_to_req)
+        
         # merge variables from all hosts
         variable_handler.merge_variables_in_redis_no_of_hosts(r,par_dollar_variables,no_of_hosts)
     

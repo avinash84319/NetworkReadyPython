@@ -6,7 +6,7 @@
 
 >>>
 #this will be the path to the requirments.txt file in relative
-requirments.txt
+/home/avinash/development/ReddyNet_V2.0/reqfake.txt
 >>>
 
 ^^^

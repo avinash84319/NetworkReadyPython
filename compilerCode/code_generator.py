@@ -27,7 +27,7 @@ def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,im
         file.write(imports_packages+"\n")
 
         #writing json import statement
-        file.write("import json\n")
+        file.write("from compilerCode import data_serializer\n")
 
 
         # writing redis import statement
@@ -41,7 +41,7 @@ def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,im
         
         for variable in variables:
             if r.exists(str(variable[2:])):
-                file.write(f"{variable[2:]}=json.loads(r.get('{str(variable[2:])}'))\n")
+                file.write(f"{variable[2:]}=data_serializer.deserialize_data(r.get('{str(variable[2:])}'))\n")
 
         # writing the code
 
@@ -54,7 +54,7 @@ def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,im
         variables = seq_dollar_variables+seq_underscore_variables
         
         for i in range(len(variables)):
-            file.write(f"r.set('{str(variables[i][2:])}',json.dumps({variables[i][2:]}))\n")
+            file.write(f"r.set('{str(variables[i][2:])}',data_serializer.serialize_data({variables[i][2:]}))\n")
     
 def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,imports_packages,no_of_hosts):
     """
@@ -81,7 +81,7 @@ def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,impo
             file.write(imports_packages+"\n")
 
             #writing json import statement
-            file.write("import json\n")
+            file.write("from compilerCode import data_serializer\n")
 
             # writing redis import statement
             file.write("import redis\n")
@@ -92,14 +92,14 @@ def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,impo
             variables = par_dollar_variables
 
             for variable in variables:
-                file.write(f"{variable[2:]}=json.loads(r.get('{str(variable[2:])}${no}'))\n")
+                file.write(f"{variable[2:]}=data_serializer.deserialize_data(r.get('{str(variable[2:])}${no}'))\n")
 
             # writing the code to get the _ variables
             # here the key would be just variable name since this is not divided among the hosts
             variables = par_underscore_variables
 
             for variable in variables:
-                file.write(f"{variable[2:]}=json.loads(r.get('{str(variable[2:])}'))\n")
+                file.write(f"{variable[2:]}=data_serializer.deserialize_data(r.get('{str(variable[2:])}'))\n")
             
             # writing the user code
             for line_tokens in tokens:
@@ -111,13 +111,13 @@ def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,impo
 
             variables = par_dollar_variables
             for variable in variables:
-                file.write(f"r.set('{str(variable[2:])}${no}',json.dumps({variable[2:]}))\n")
+                file.write(f"r.set('{str(variable[2:])}${no}',data_serializer.serialize_data({variable[2:]}))\n")
 
             # writing the code to set the ??variables after the code execution
             # here the key would be just variable name since this is not divided among the hosts
 
             variables = par_underscore_variables
             for variable in variables:
-                file.write(f"r.set('{str(variable[2:])}',json.dumps({variable[2:]}))\n")
+                file.write(f"r.set('{str(variable[2:])}',data_serializer.serialize_data({variable[2:]}))\n")
 
             

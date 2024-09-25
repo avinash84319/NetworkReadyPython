@@ -2,7 +2,7 @@
 this module will contain the code verifier functions
 """
 
-import json
+from compilerCode import data_serializer
 
 def verify_dollar_variables(r,variables):
 
@@ -15,7 +15,7 @@ def verify_dollar_variables(r,variables):
     for variable in variables:
         
         variable_value = r.get(variable[2:])
-        variable_value = json.loads(variable_value)
+        variable_value = data_serializer.deserialize_data(variable_value)
 
         if not isinstance(variable_value,list):
             raise Exception("The variable "+variable+" is not a list")

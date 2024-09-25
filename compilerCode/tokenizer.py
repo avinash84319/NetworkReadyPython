@@ -4,7 +4,7 @@ This module contains the Tokenizer functions, which is used to tokenize the inpu
 
 ALPHABETS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUMBERS = "0123456789"
-OPERATORS = ["+","-","*","/","%","=",">","<","!","&","|","^","~","?",".",",",";",":","(",")","[","]","{","}"]
+OPERATORS = ["+","-","*","/","%","=",">","<","!","&","|","^","~",".",",",";",":","(",")","[","]","{","}"]
 KEYWORDS = ["print","if","push","else","elif","while","for","do","switch","case","break","continue","return","goto","define","include","import","from","as","class","def","try"]
 
 
@@ -20,7 +20,7 @@ def tokenize(code):
 
     return tokens
 
-def get_symbol_variables(tokens,symbol="$"):
+def get_symbol_variables(tokens,symbol):
 
     """
     This function will return the variables used in the code
@@ -30,14 +30,14 @@ def get_symbol_variables(tokens,symbol="$"):
 
     variables = []
 
-    for line_tokens in tokens:
+    for i,line_tokens in enumerate(tokens):
 
         stack=[]
         line_variables = []
 
         for token in line_tokens:
 
-            if token in ALPHABETS or token in NUMBERS or token=="_" or token==symbol:
+            if token in ALPHABETS or token in NUMBERS or token=="_" or token==symbol[0]:
                 stack.append(token)
 
             if token in OPERATORS or token in [" ","\t","\n"]:
@@ -59,8 +59,8 @@ def get_symbol_variables(tokens,symbol="$"):
     variables = [ list(set(line_variables)) for line_variables in variables ]
 
     # Removing the variables which are not starting with symbol
-    variables = [ [ variable for variable in line_variables if variable[0]==symbol ] for line_variables in variables ]
-    
+    variables = [ [ variable for variable in line_variables if variable[:2]==symbol ] for line_variables in variables ]
+
     return variables
 
 def get_variables(tokens):
@@ -68,12 +68,12 @@ def get_variables(tokens):
     """
     This function will return the variables used in the code
     input: tokens (list of list of strings)
-    output: $variables (list of list of strings)
-            _variables (list of list of strings)
+    output: $$variables (list of list of strings)
+            ??variables (list of list of strings)
     """
 
-    dollor_variables = get_symbol_variables(tokens,symbol="$")
-    underscore_variables = get_symbol_variables(tokens,symbol="_")
+    dollor_variables = get_symbol_variables(tokens,symbol="$$")
+    underscore_variables = get_symbol_variables(tokens,symbol="??")
     
     return dollor_variables,underscore_variables
 
@@ -98,3 +98,28 @@ def get_variables_list(variables_linewise):
                 variables.append(variable)
 
     return variables
+
+
+def remove_compiler_tokens_from_variables(tokens):
+
+    """
+    This function will remove the compiler needed tokens like $$ and ?? from the variables
+    input: tokens (list of list of strings)
+    output: tokens (list of list of strings)
+    """
+
+    for i in range(len(tokens)):
+        for j in range(len(tokens[i])):
+
+            if tokens[i][j] == "$" and tokens[i][j+1] == "$":
+                tokens[i][j] = ""
+                tokens[i][j+1] = ""
+
+    for i in range(len(tokens)):
+        for j in range(len(tokens[i])):
+
+            if tokens[i][j] == "?" and tokens[i][j+1] == "?":
+                tokens[i][j] = ""
+                tokens[i][j+1] = ""
+
+    return tokens

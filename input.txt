@@ -19,26 +19,24 @@ import fastapi
 
 ---
 # this is a sequential code
-_b=2
-$a=[x*_b for x in range(10)]
+??b=2
+$$a=[x*??b for x in range(100000)]
 ---
 
 |||
 # this is a parallel code
-print(f"this is b {_b}")
-$a=[x*_b for x in $a]
-_b=_b*2
+$$a=[x*??b for x in $$a]
+??b=??b*2
 |||
 
 ---
 # this is a sequential code
-$a=[x*2 for x in $a]
-_b=_b*2
+$$a=[x*??b for x in $$a]
+??b=??b*2
 ---
 
 |||
 # this is a parallel code
-print(f"this is b {_b}")
-$a=[x*4 for x in $a]
-print($a)
+$$a=[x*??b for x in $$a]
+print($$a)
 |||

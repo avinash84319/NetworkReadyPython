@@ -14,7 +14,7 @@ def verify_dollar_variables(r,variables):
 
     for variable in variables:
         
-        variable_value = r.get(variable[1:])
+        variable_value = r.get(variable[2:])
         variable_value = json.loads(variable_value)
 
         if not isinstance(variable_value,list):

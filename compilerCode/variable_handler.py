@@ -33,7 +33,7 @@ def divide_variables_in_redis_no_of_hosts(r,variables,no_of_hosts):
     
     for variable in variables:
         
-        variable_value = r.get(variable[1:])
+        variable_value = r.get(variable[2:])
         variable_value = json.loads(variable_value)
         
         # dividing the variable into the no of hosts using generator
@@ -42,7 +42,7 @@ def divide_variables_in_redis_no_of_hosts(r,variables,no_of_hosts):
         
         # saving the variable in redis
         for i,variable_part in enumerate(variable_value):
-            r.set(f"{variable[1:]}${i}",json.dumps(variable_part))
+            r.set(f"{variable[2:]}${i}",json.dumps(variable_part))
 
     return None
 
@@ -59,13 +59,13 @@ def merge_variables_in_redis_no_of_hosts(r,variables,no_of_hosts):
         
         # merging the variable from the no of hosts
         for i in range(no_of_hosts):
-            variable_part = r.get(f"{variable[1:]}${i}")
+            variable_part = r.get(f"{variable[2:]}${i}")
             variable_part = json.loads(variable_part)
             variable_value.extend(variable_part)
 
         print(f"value of {variable} after par execution: {variable_value[:10]} ... ")
 
         # saving the variable in redis
-        r.set(variable[1:],json.dumps(variable_value))
+        r.set(variable[2:],json.dumps(variable_value))
 
     return None

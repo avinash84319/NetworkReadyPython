@@ -48,10 +48,10 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
 
 
         # generating the sequential code
-        code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages)
+        code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts)
 
         # installing the required packages
-        environment_setup.install_packages(path_to_req)
+        # environment_setup.install_packages(path_to_req)      #until development same directory is used
 
         # executing the sequential code
         code_executor.seq_code_execute(r)
@@ -69,7 +69,7 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
         code_generator.par_code_generator(par_tokens,par_dollar_variables,par_underscore_variables,imports_packages,no_of_hosts)
 
         # executing the parallel code using servers on the hosts
-        code_executor.server_par_code_executor(hosts,path_to_req)
+        code_executor.server_par_code_executor(hosts,path_to_req,r)
         
         # merge variables from all hosts
         variable_handler.merge_variables_in_redis_no_of_hosts(r,par_dollar_variables,no_of_hosts)

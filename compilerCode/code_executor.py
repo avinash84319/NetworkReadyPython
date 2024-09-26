@@ -20,11 +20,12 @@ def seq_code_execute(r):
 
     return None
 
-def server_par_code_executor(hosts,path_to_req):
+def server_par_code_executor(hosts,path_to_req,r):
     """
     This function will execute the parallel user code.
     input:hosts list of strings, reads the code from par_code.py
           path_to_req: string: path to requirements.txt
+          r: redis
     output:None, output at the desired location
     """
 
@@ -32,13 +33,52 @@ def server_par_code_executor(hosts,path_to_req):
     
     with concurrent.futures.ThreadPoolExecutor() as executor:
         results = [executor.submit(requests.post,f"{host}/execute",files={'code_file':open(f'par_cd/par_code_{i}.py','rb'),'req_file':open(path_to_req,'rb')}) for i,host in enumerate(hosts)]
+        
+        # checking the results
         for f in concurrent.futures.as_completed(results):
-            if f.result().status_code == 200:
-                print(f"Code executed successfully at {f.result().url}")
-            else:
-                # stop the execution if error occured
-                print(f"Error occured at {f.result().url}")
-                exit()
+            try:
+                response = f.result()
+                if response.status_code == 200:
+                    print(f"Code executed successfully at {response.url}")
+                elif response.status_code == 500:
+                    print(f"Error occurred at {response.url} error: {response.json()['error']}")
+                else:
+                    # Handle HTTP errors
+                    response.raise_for_status()
+            except requests.exceptions.HTTPError as errh:
+                print(f"HTTP Error occurred: {errh}")
+            except requests.exceptions.ConnectionError as errc:
+                print(f"Error occurred while connecting: {errc}")
+            except requests.exceptions.Timeout as errt:
+                print(f"Timeout occurred: {errt}")
+            # except requests.exceptions.RequestException as err:
+            #     print(f"An error occurred: {err}")
+
+    completed_hosts=[]
+    #check all hosts who have executed code properly
+    for no,host in enumerate(hosts):
+        if r.get(f"flag_for_host_execution_{no}") ==b'2':
+            completed_hosts.append(host)
+    
+    # check if any code failed to execute and execute in other servers
+    for no,host in enumerate(hosts):
+        
+        if r.get(f"flag_for_host_execution_{no}") !=b'2':
+
+            for new_host in hosts:
+                if new_host in completed_hosts:
+                    print(f"Trying second pass for {host}'s code in {new_host}") 
+                    # send the code to the new host
+                    requests.post(f"{new_host}/execute",files={'code_file':open(f'par_cd/par_code_{no}.py','rb'),'req_file':open(path_to_req,'rb')})
+                    # check if the code executed properly
+                    if r.get(f"flag_for_host_execution_{no}") ==b'2':
+                        print(f"Code executed successfully at {new_host}")
+                        completed_hosts.append(host)
+                        break
+                    else:
+                        print(f"Error occured at {new_host} also so exiting something wrong in code of par_cd/par_code_{no}")
+                        exit()
+
                 
 
     return None

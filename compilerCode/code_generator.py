@@ -4,15 +4,16 @@ This file contains the code to generate the code for the given code block
 
 from compilerCode import tokenizer
 
-def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,imports_packages):
+def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts):
 
     """
-    This function will execute the given code
+    This function will add necessary code to the given sequential code to execute
     input:  r (redis)
             tokens (list of list of strings)
             seq_dollar_variables (list of strings)
             seq_underscore_variables (list of strings)
             imports_packages (strings)
+            hosts (list of strings)
     output: seq_code.py file with necessary code to execute the given code
     """
     
@@ -33,6 +34,12 @@ def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,im
         # writing redis import statement
         file.write("import redis\n")
         file.write("r = redis.Redis(host='localhost', port=6379)\n")
+
+        # writing the code to set the flags for the host execution
+        # since this is sequential code and parallel code will execute after this setting all to 0
+
+        for host_no in range(len(hosts)):
+            file.write(f"r.set('flag_for_host_execution_{host_no}',0)\n")
 
         variables = seq_dollar_variables + seq_underscore_variables
 
@@ -77,6 +84,10 @@ def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,impo
         # writing the code to a file to execute
         with open(f'par_cd/par_code_{no}.py', 'w',encoding='utf-8') as file:
 
+            # #for testing error adding some bad code
+            if no==1:
+                file.write("print(a)")
+
             # writing the import statements
             file.write(imports_packages+"\n")
 
@@ -86,6 +97,9 @@ def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,impo
             # writing redis import statement
             file.write("import redis\n")
             file.write("r = redis.Redis(host='localhost', port=6379)\n")
+
+            # writing the code to set the flag for the host execution
+            file.write(f"r.set('flag_for_host_execution_{no}',1)\n")
 
             # writing the code to get the $ variables
             # here the key would be variable name + $ + no but in code the variable name would be without $ and no
@@ -119,5 +133,9 @@ def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,impo
             variables = par_underscore_variables
             for variable in variables:
                 file.write(f"r.set('{str(variable[2:])}',data_serializer.serialize_data({variable[2:]}))\n")
+
+            # writing the code to set the flag for the host execution after the code execution
+
+            file.write(f"r.set('flag_for_host_execution_{no}',2)\n")
 
             

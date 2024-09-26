@@ -29,8 +29,11 @@ def execute():
     # setting up the environment
     environment_setup.install_packages("server_cd/req.txt")
 
-    exec(code,{}) # some strange issue with exec function when using list comprehension
-    #checkout stackoverflow to understand
+    try:
+        exec(code,{}) # some strange issue with exec function when using list comprehension
+        #checkout stackoverflow to understand the issue
+    except Exception as e:
+        return jsonify({"error": str(e)}),500
 
     # removing the installed packages
     # environment_setup.remove_packages("server_cd/req.txt")  #while development same directory is used

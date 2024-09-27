@@ -2,22 +2,27 @@
 
 #!/bin/bash
 
-# Find the process IDs (PIDs) of Flask servers running on port 3000 and 5000
-pid_3000=$(lsof -ti :3000)
-pid_5000=$(lsof -ti :5000)
+#!/bin/bash
 
-# Check if a process is running on port 3000 and kill it
-if [ -n "$pid_3000" ]; then
-    echo "Stopping Flask server on port 3000 (PID: $pid_3000)"
-    kill -9 "$pid_3000"
-else
-    echo "No Flask server found on port 3000"
-fi
+# Function to stop processes on a given port
+stop_process_on_port() {
+    local port=$1
+    # Get all PIDs on the specified port
+    pids=$(lsof -ti :$port)
 
-# Check if a process is running on port 5000 and kill it
-if [ -n "$pid_5000" ]; then
-    echo "Stopping Flask server on port 5000 (PID: $pid_5000)"
-    kill -9 "$pid_5000"
-else
-    echo "No Flask server found on port 5000"
-fi
+    if [ -n "$pids" ]; then
+        echo "Stopping processes on port $port (PIDs: $pids)"
+        # Loop through each PID and kill them
+        for pid in $pids; do
+            sudo kill -9 "$pid"
+            echo "Killed PID $pid on port $port"
+        done
+    else
+        echo "No process found on port $port"
+    fi
+}
+
+# Stop processes on port 3000 and 5000
+stop_process_on_port 3000
+stop_process_on_port 5000
+

@@ -6,7 +6,7 @@ import json
 import jsonpickle
 import pickle
 
-def serialize_data(data,option=0):
+def serialize_data(data,option=2):
     """
     This function will serialize the data
     input: data (value of data)
@@ -22,7 +22,7 @@ def serialize_data(data,option=0):
 
     return "wrong option for serialization"
 
-def deserialize_data(data,option=0):
+def deserialize_data(data,option=2):
 
     """
     This function will deserialize the data

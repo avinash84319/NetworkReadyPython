@@ -85,8 +85,8 @@ def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,impo
         with open(f'par_cd/par_code_{no}.py', 'w',encoding='utf-8') as file:
 
             # #for testing error adding some bad code
-            if no==1:
-                file.write("print(a)")
+            # if no==1:
+            #     file.write("print(a)")
 
             # writing the import statements
             file.write(imports_packages+"\n")

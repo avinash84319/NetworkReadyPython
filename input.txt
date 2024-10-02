@@ -16,30 +16,30 @@ import collections
 import math
 import random
 import fastapi
+import numpy as np
 ^^^
 
 ---
 # this is a sequential code
 ??b=2
-$$a=[x*??b for x in range(100000)]
+$$a=np.array([x*??b for x in range(100000)])
 ---
 
 |||
 # this is a parallel code
-$$a=[x*??b for x in $$a]
+$$a=np.array([x*??b for x in $$a])
 ??b=??b*2
 |||
 
 ---
 # this is a sequential code
-$$a=[x*??b for x in $$a]
+$$a=np.array([x*??b for x in $$a])
 ??b=??b*2
 ---
 
 |||
 # this is a parallel code
-$$a=[x*??b for x in $$a]
-print($$a)
+$$a=np.array([x*??b for x in $$a])
 |||
 
 ---

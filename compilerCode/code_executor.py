@@ -69,7 +69,16 @@ def server_par_code_executor(hosts,path_to_req,r):
                 if new_host in completed_hosts:
                     print(f"Trying second pass for {host}'s code in {new_host}") 
                     # send the code to the new host
-                    requests.post(f"{new_host}/execute",files={'code_file':open(f'par_cd/par_code_{no}.py','rb'),'req_file':open(path_to_req,'rb')})
+                    try:
+                        requests.post(f"{new_host}/execute",files={'code_file':open(f'par_cd/par_code_{no}.py','rb'),'req_file':open(path_to_req,'rb')})
+                    except requests.exceptions.HTTPError as errh:
+                        print(f"HTTP Error occurred: {errh} at {new_host}")
+                    except requests.exceptions.ConnectionError as errc:
+                        print(f"Error occurred while connecting: {errc} at {new_host}")
+                    except requests.exceptions.Timeout as errt:
+                        print(f"Timeout occurred: {errt} at {new_host}")
+                    except requests.exceptions.RequestException as err:
+                        print(f"An error occurred: {err} at {new_host}")
                     # check if the code executed properly
                     if r.get(f"flag_for_host_execution_{no}") ==b'2':
                         print(f"Code executed successfully at {new_host}")

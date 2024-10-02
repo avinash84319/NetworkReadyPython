@@ -66,11 +66,11 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
         # removing the installed packages
         # environment_setup.remove_packages(path_to_req)      #until development same directory is used
         
-        # verify variables to be list
+        # verify variables to be list,numpy or pandas dfs
         code_verifier.verify_dollar_variables(r,seq_dollar_variables)
 
         # devide and save variables for each host
-        variable_handler.divide_variables_in_redis_no_of_hosts(r,seq_dollar_variables,no_of_hosts)
+        var_type=variable_handler.divide_variables_in_redis_no_of_hosts(r,seq_dollar_variables,no_of_hosts)
 
         # generating the parallel code
         code_generator.par_code_generator(par_tokens,par_dollar_variables,par_underscore_variables,imports_packages,no_of_hosts)
@@ -79,7 +79,7 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
         code_executor.server_par_code_executor(hosts,path_to_req,r)
         
         # merge variables from all hosts
-        variable_handler.merge_variables_in_redis_no_of_hosts(r,par_dollar_variables,no_of_hosts)
+        variable_handler.merge_variables_in_redis_no_of_hosts(r,par_dollar_variables,no_of_hosts,var_type)
     
 
     # if there is an extra sequential code

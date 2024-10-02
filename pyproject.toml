@@ -13,6 +13,7 @@ flask = "^3.0.3"
 requests = "^2.32.3"
 fastapi = "^0.114.0"
 jsonpickle = "^3.3.0"
+pandas = "^2.2.3"
 
 
 [build-system]

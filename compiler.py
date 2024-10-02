@@ -29,6 +29,13 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
     # getting the no of hosts
     no_of_hosts = len(hosts)
 
+    # adding one extra sequential code if the no of sequential and parallel code is not equal
+    ope_extra_seq = None
+
+    if len(multi_sequential_code) != len(multi_parallel_code):
+        one_extra_seq = multi_sequential_code[-1]
+        multi_sequential_code = multi_sequential_code[:-1]
+
     # loop for each sequential and parallel code pair
     for sequential_code,parallel_code in zip(multi_sequential_code,multi_parallel_code):
 
@@ -74,6 +81,31 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
         # merge variables from all hosts
         variable_handler.merge_variables_in_redis_no_of_hosts(r,par_dollar_variables,no_of_hosts)
     
+
+    # if there is an extra sequential code
+    if one_extra_seq:
+
+        # Tokenizing the code
+        seq_tokens = tokenizer.tokenize(one_extra_seq)
+
+        # Getting the variables used in the code linewise
+        seq_dollar_variables_linewise,seq_underscore_variables_linewise = tokenizer.get_variables(seq_tokens)
+
+        # Getting the variables used in the code in a list
+        seq_dollar_variables = tokenizer.get_variables_list(seq_dollar_variables_linewise)
+        seq_underscore_variables = tokenizer.get_variables_list(seq_underscore_variables_linewise)
+
+        # generating the sequential code
+        code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts)
+
+        # installing the required packages
+        # environment_setup.install_packages(path_to_req)      #until development same directory is used
+
+        # executing the sequential code
+        code_executor.seq_code_execute(r)
+
+        # removing the installed packages
+        # environment_setup.remove_packages(path_to_req)      #until development same directory is used
 
 if __name__ == "__main__":
     print("Compiler started")

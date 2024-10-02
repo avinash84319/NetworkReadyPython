@@ -41,3 +41,9 @@ $$a=[x*??b for x in $$a]
 $$a=[x*??b for x in $$a]
 print($$a)
 |||
+
+---
+# this is a sequential code
+print($$a[:10])
+print("done")
+---

@@ -147,9 +147,6 @@ def separate_code(code):
         if ip == 1:
             imports_packages.append(line)
 
-    if len(multi_sequential_code) != len(multi_parallel_code):
-        print("The number of sequential and parallel code blocks should be equal")
-
     # Removing the empty strings and quotes from the hosts
     hosts = [i[1:-1] for i in hosts if i!=""]
 

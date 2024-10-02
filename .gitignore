@@ -2,3 +2,5 @@ par_cd
 seq_cd
 server_cd
 __pycache__/
+user_workspace/
+server_workspace/

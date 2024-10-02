@@ -1,6 +1,7 @@
 """ 
 This module will run the compiler on the given input file
 """
+import sys
 import redis
 import compilerCode.code_handler as code_handler
 import compilerCode.tokenizer as tokenizer
@@ -9,14 +10,16 @@ import compilerCode.code_executor as code_executor
 import compilerCode.code_verifier as code_verifier
 import compilerCode.variable_handler as variable_handler
 import compilerCode.environment_setup as environment_setup
+import compilerCode.workspace_manager as workspace_manager
 
 
-def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
+def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_workspace="/home/avinash/development/ReddyNet_V2.0/user_workspace"):
 
     """ 
     This function will compile the given code and run it.
     imputs: code: str: code to be compiled
-            r: redis object: redis object 
+            r: redis object: redis object
+            path_to_workspace: str: path to the usrs workspace where the code is present
     """
 
     # removing comments from the code
@@ -28,6 +31,9 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
 
     # getting the no of hosts
     no_of_hosts = len(hosts)
+
+    # sending workspace to all hosts
+    server_workspace_ids=workspace_manager.send_workspace_to_hosts(hosts,path_to_workspace)
 
     # adding one extra sequential code if the no of sequential and parallel code is not equal
     ope_extra_seq = None
@@ -111,8 +117,10 @@ if __name__ == "__main__":
     print("Compiler started")
     #redis
     red = redis.Redis(host='localhost', port=6379, db=0)
+    path_to_workspace=sys.argv[1]
+    input_file=sys.argv[2] if len(sys.argv)>2 else "input.txt"
     # Read the input file
-    with open('input.txt', 'r',encoding='utf-8') as file:
+    with open(path_to_workspace+input_file, 'r',encoding='utf-8') as file:
         input_file = file.read()
-    compile_run(input_file,red)
+    compile_run(input_file,red,path_to_workspace)
     

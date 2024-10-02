@@ -6,15 +6,15 @@ This module will contain all the functions to handle the workspace in hosts
 import os
 import requests
 
-def create_workspace(hosts,workspace_path):
+def send_workspace_to_hosts(hosts,workspace_path):
     """
     This function will create the workspace for the hosts
     input: hosts (list of strings),workspace_path (string)
     output: ids (dict) host:workspace_id , creates workspace at the hosts
     """
 
-    directory_path = workspace_path.split(",")[-1]
-    workspace_path = "/".join(workspace_path.split(",")[:-1])
+    directory_path = workspace_path.split("/")[-1]
+    workspace_path = "/".join(workspace_path.split("/")[:-1])
 
     workspace_json = get_workspace_json(workspace_path,directory_path)
 

@@ -120,7 +120,7 @@ if __name__ == "__main__":
     path_to_workspace=sys.argv[1]
     input_file=sys.argv[2] if len(sys.argv)>2 else "input.txt"
     # Read the input file
-    with open(path_to_workspace+input_file, 'r',encoding='utf-8') as file:
+    with open(path_to_workspace+"/"+input_file, 'r',encoding='utf-8') as file:
         input_file = file.read()
     compile_run(input_file,red,path_to_workspace)
     

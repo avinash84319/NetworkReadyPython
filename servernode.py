@@ -1,13 +1,38 @@
 from flask import Flask, request, jsonify
+import uuid
 
 import compilerCode.code_executor as code_executor
 import compilerCode.environment_setup as environment_setup
+import compilerCode.workspace_manager as workspace_manager
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
     return "ReddyNet server at your service!"
+
+@app.route("/workspace", methods=["POST"])
+def workspace():
+    """
+    This function will create the workspace for the server
+    inputs: workspace_json: dict: json containing the workspace information
+    outputs: message: str: message of the workspace creation
+    """
+    workspace_json = request.json
+    path_to_save = "/home/avinash/development/ReddyNet_V2.0/server_workspace"
+
+    #creating the id for the workspace
+    id = str(uuid.uuid4())
+
+    path_to_save = path_to_save + "/" + id
+
+    try:
+        workspace_manager.server_workspace_creater(path_to_save, workspace_json)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"message": "Workspace created successfully", "id": id})
+
 
 @app.route("/execute", methods=["POST"])
 def execute():

@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import uuid
+import os
 
 import compilerCode.code_executor as code_executor
 import compilerCode.environment_setup as environment_setup
@@ -19,7 +20,10 @@ def workspace():
     outputs: message: str: message of the workspace creation
     """
     workspace_json = request.json
-    path_to_save = "/home/avinash/development/ReddyNet_V2.0/server_workspace"
+    path_to_save = "./server_workspace"
+
+    if not os.path.exists(path_to_save):
+        os.makedirs(path_to_save)
 
     #creating the id for the workspace
     id = str(uuid.uuid4())
@@ -44,6 +48,9 @@ def execute():
     """
     code = request.files['code_file'].read().decode("utf-8")
     req_file = request.files['req_file'].read().decode("utf-8")
+
+    if not os.path.exists("server_cd"):
+        os.makedirs("server_cd")
 
     # write the req_file to the req.txt
     with open("server_cd/req.txt", "w") as file:

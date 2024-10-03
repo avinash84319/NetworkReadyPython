@@ -4,6 +4,8 @@ This file contains the code to generate the code for the given code block
 
 from compilerCode import tokenizer
 
+import os
+
 def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts):
 
     """
@@ -20,6 +22,9 @@ def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,im
     # removing all $$,?? from tokens
 
     tokens=tokenizer.remove_compiler_tokens_from_variables(tokens)
+
+    if not os.path.exists('seq_cd'):
+        os.makedirs('seq_cd')
 
     # writing the code to a file to execute
     with open('seq_cd/seq_code.py', 'w',encoding='utf-8') as file:
@@ -78,6 +83,8 @@ def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,impo
 
     tokens=tokenizer.remove_compiler_tokens_from_variables(tokens)
 
+    if not os.path.exists('par_cd'):
+        os.makedirs('par_cd')
     
     for no in range(no_of_hosts):
 

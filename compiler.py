@@ -36,7 +36,7 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_works
     server_workspace_ids=workspace_manager.send_workspace_to_hosts(hosts,path_to_workspace)
 
     # adding one extra sequential code if the no of sequential and parallel code is not equal
-    ope_extra_seq = None
+    one_extra_seq = None
 
     if len(multi_sequential_code) != len(multi_parallel_code):
         one_extra_seq = multi_sequential_code[-1]
@@ -75,14 +75,14 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_works
         # verify variables to be list,numpy or pandas dfs
         code_verifier.verify_dollar_variables(r,seq_dollar_variables)
 
-        # devide and save variables for each host
+        # devide and save variables for each host and get var type in a list,numpy or pandas dfs
         var_type=variable_handler.divide_variables_in_redis_no_of_hosts(r,seq_dollar_variables,no_of_hosts)
 
         # generating the parallel code
         code_generator.par_code_generator(par_tokens,par_dollar_variables,par_underscore_variables,imports_packages,no_of_hosts)
 
         # executing the parallel code using servers on the hosts
-        code_executor.server_par_code_executor(hosts,path_to_req,r)
+        code_executor.server_par_code_executor(hosts,path_to_req,r,server_workspace_ids)
         
         # merge variables from all hosts
         variable_handler.merge_variables_in_redis_no_of_hosts(r,par_dollar_variables,no_of_hosts,var_type)

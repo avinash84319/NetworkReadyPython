@@ -20,19 +20,20 @@ def seq_code_execute(r):
 
     return None
 
-def server_par_code_executor(hosts,path_to_req,r):
+def server_par_code_executor(hosts,path_to_req,r,server_workspace_ids):
     """
     This function will execute the parallel user code.
     input:hosts list of strings, reads the code from par_code.py
           path_to_req: string: path to requirements.txt
           r: redis
+         server_workspace_ids: list of strings: ids of the server workspaces
     output:None, output at the desired location
     """
 
     # executing the code on hosts concurrently by sending the par files to the hosts
     
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = [executor.submit(requests.post,f"{host}/execute",files={'code_file':open(f'par_cd/par_code_{i}.py','rb'),'req_file':open(path_to_req,'rb')}) for i,host in enumerate(hosts)]
+        results = [executor.submit(requests.post,f"{host}/execute",json={'code_file':open(f'par_cd/par_code_{i}.py').read(),'req_file':open(path_to_req).read(),"server_workspace_id":server_workspace_ids[host]}) for i,host in enumerate(hosts)]
         
         # checking the results
         for f in concurrent.futures.as_completed(results):
@@ -70,7 +71,7 @@ def server_par_code_executor(hosts,path_to_req,r):
                     print(f"Trying second pass for {host}'s code in {new_host}") 
                     # send the code to the new host
                     try:
-                        requests.post(f"{new_host}/execute",files={'code_file':open(f'par_cd/par_code_{no}.py','rb'),'req_file':open(path_to_req,'rb')})
+                        requests.post(f"{new_host}/execute",json={'code_file':open(f'par_cd/par_code_{no}.py').read(),'req_file':open(path_to_req).read(),"server_workspace_id":server_workspace_ids[host]})
                     except requests.exceptions.HTTPError as errh:
                         print(f"HTTP Error occurred: {errh} at {new_host}")
                     except requests.exceptions.ConnectionError as errc:

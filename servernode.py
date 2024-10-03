@@ -46,20 +46,24 @@ def execute():
     imputs: code_file (file): file containing the code to be executed
     outputs: message: str: message of the execution
     """
-    code = request.files['code_file'].read().decode("utf-8")
-    req_file = request.files['req_file'].read().decode("utf-8")
+    code = request.json['code_file']
+    req_file = request.json['req_file']
+    id = request.json['server_workspace_id']
 
-    if not os.path.exists("server_cd"):
-        os.makedirs("server_cd")
+    if not os.path.exists("server_workspace"+"/"+id):
+        os.makedirs("server_workspace"+"/"+id)
+
+    # check directory of user workspace
+    user_workspace = os.listdir("server_workspace"+"/"+id)[0]
 
     # write the req_file to the req.txt
-    with open("server_cd/req.txt", "w") as file:
+    with open("server_workspace"+"/"+id+"/"+user_workspace+"/req.txt", "w") as file:
         file.write(req_file)
 
     print(code)
 
     # setting up the environment
-    environment_setup.install_packages("server_cd/req.txt")
+    environment_setup.install_packages("server_workspace"+"/"+id+"/"+user_workspace+"/req.txt")
 
     try:
         exec(code,{}) # some strange issue with exec function when using list comprehension
@@ -68,7 +72,7 @@ def execute():
         return jsonify({"error": str(e)}),500
 
     # removing the installed packages
-    # environment_setup.remove_packages("server_cd/req.txt")  #while development same directory is used
+    # environment_setup.remove_packages("server_workspace"+"/"+id+"/"+user_workspace+"/req.txt")  #while development same directory is used
     
     return jsonify({"message": "Code executed successfully"})
 

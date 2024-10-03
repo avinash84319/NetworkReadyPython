@@ -84,6 +84,8 @@ def divide_variables_in_redis_no_of_hosts(r,variables,no_of_hosts):
         # dividing the variable into the no of hosts using generator
         # here based on different strategies the variable can be divided (next version)
 
+        var_type=type(variable_value)
+
         #check type of variable_value
         if type(variable_value) == list:
             variable_value = divide_list(variable_value,no_of_hosts)
@@ -98,7 +100,7 @@ def divide_variables_in_redis_no_of_hosts(r,variables,no_of_hosts):
         for i,variable_part in enumerate(variable_value):
             r.set(f"{variable[2:]}${i}",data_serializer.serialize_data(variable_part))
 
-    return type(variable_value)
+    return var_type
 
 def merge_variables_in_redis_no_of_hosts(r,variables,no_of_hosts,var_type):
     """
@@ -106,6 +108,8 @@ def merge_variables_in_redis_no_of_hosts(r,variables,no_of_hosts,var_type):
     input:r (redis),dollor variables (list of variables), no_of_hosts (int) ,var_type (type of variable)
     output: None, variables printed on terminal
     """
+
+    print(f'var type is {var_type}')
 
     if var_type == list:
         merge_list_variables_in_redis_no_of_hosts(r,variables,no_of_hosts)
@@ -159,6 +163,9 @@ def merge_numpy_array_variables_in_redis_no_of_hosts(r,variables,no_of_hosts):
             variable_part = data_serializer.deserialize_data(variable_part)
             variable_value = np.append(variable_value,variable_part)
 
+        # saving the variable in redis
+        r.set(variable[2:],data_serializer.serialize_data(variable_value))
+
         print(f"value of {variable} after par execution: {variable_value[:10]} ... ")
 
     return None
@@ -179,6 +186,9 @@ def merge_dataframe_variables_in_redis_no_of_hosts(r,variables,no_of_hosts):
             variable_part = r.get(f"{variable[2:]}${i}")
             variable_part = data_serializer.deserialize_data(variable_part)
             variable_value = pd.concat([variable_value,variable_part])
+        
+        # saving the variable in redis
+        r.set(variable[2:],data_serializer.serialize_data(variable_value))
 
         print(f"value of {variable} after par execution: {variable_value.head()} ... ")
 

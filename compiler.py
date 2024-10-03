@@ -105,13 +105,13 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_works
         code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts)
 
         # installing the required packages
-        # environment_setup.install_packages(path_to_req)      #until development same directory is used
+        # environment_setup.compile_install_packages(path_to_req)      #until development same directory is used
 
         # executing the sequential code
         code_executor.seq_code_execute(r)
 
         # removing the installed packages
-        # environment_setup.remove_packages(path_to_req)      #until development same directory is used
+        # environment_setup.compile_remove_packages(path_to_req)      #until development same directory is used
 
 if __name__ == "__main__":
     print("Compiler started")

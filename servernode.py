@@ -8,6 +8,8 @@ import compilerCode.workspace_manager as workspace_manager
 
 app = Flask(__name__)
 
+workspace_data_path="/workspaces/server_workspace"
+
 @app.route("/")
 def home():
     return "ReddyNet server at your service!"
@@ -20,7 +22,7 @@ def workspace():
     outputs: message: str: message of the workspace creation
     """
     workspace_json = request.json
-    path_to_save = "./server_workspace"
+    path_to_save = workspace_data_path
 
     if not os.path.exists(path_to_save):
         os.makedirs(path_to_save)
@@ -37,6 +39,50 @@ def workspace():
 
     return jsonify({"message": "Workspace created successfully", "id": id})
 
+@app.route("/workspace/install/check", methods=["GET"])
+def check_install():
+    """
+    This function will check if the packages are installed for the workspace
+    inputs: id: str: id of the workspace
+    outputs: message: str: message of the installation
+    """
+
+    id = request.json['server_workspace_id']
+
+    # check directory of user workspace
+    user_workspace = os.listdir(workspace_data_path+"/"+id)[0]
+
+    if not os.path.exists(workspace_data_path+"/"+id+"/"+user_workspace+"/pyproject.toml"):
+        return jsonify({"message": "Packages not installed"}), 500
+
+    return jsonify({"message": "Packages installed"}), 200
+
+@app.route("/workspace/install", methods=["POST"])
+def install():
+    """
+    This function will install the packages for the workspace
+    inputs: id: str: id of the workspace
+    outputs: message: str: message of the installation
+    """
+
+    req_file = request.json['req_file']
+    id = request.json['server_workspace_id']
+
+    if not os.path.exists(workspace_data_path+"/"+id):
+        os.makedirs(workspace_data_path+"/"+id)
+
+    # check directory of user workspace
+    user_workspace = os.listdir(workspace_data_path+"/"+id)[0]
+
+    # write the req_file to the req.txt
+    with open(workspace_data_path+"/"+id+"/"+user_workspace+"/req.txt", "w") as file:
+        file.write(req_file)
+
+    # setting up the environment
+    environment_setup.server_install_packages(workspace_data_path+"/"+id+"/"+user_workspace+"/req.txt")
+
+    return jsonify({"message": "Packages installed successfully"})
+
 
 @app.route("/execute", methods=["POST"])
 def execute():
@@ -46,24 +92,9 @@ def execute():
     imputs: code_file (file): file containing the code to be executed
     outputs: message: str: message of the execution
     """
+    
     code = request.json['code_file']
-    req_file = request.json['req_file']
     id = request.json['server_workspace_id']
-
-    if not os.path.exists("server_workspace"+"/"+id):
-        os.makedirs("server_workspace"+"/"+id)
-
-    # check directory of user workspace
-    user_workspace = os.listdir("server_workspace"+"/"+id)[0]
-
-    # write the req_file to the req.txt
-    with open("server_workspace"+"/"+id+"/"+user_workspace+"/req.txt", "w") as file:
-        file.write(req_file)
-
-    print(code)
-
-    # setting up the environment
-    environment_setup.install_packages("server_workspace"+"/"+id+"/"+user_workspace+"/req.txt")
 
     try:
         exec(code,{}) # some strange issue with exec function when using list comprehension
@@ -72,7 +103,7 @@ def execute():
         return jsonify({"error": str(e)}),500
 
     # removing the installed packages
-    # environment_setup.remove_packages("server_workspace"+"/"+id+"/"+user_workspace+"/req.txt")  #while development same directory is used
+    # environment_setup.server_remove_packages(workspace_data_path+"/"+id+"/"+user_workspace+"/req.txt")  #while development same directory is used
     
     return jsonify({"message": "Code executed successfully"})
 

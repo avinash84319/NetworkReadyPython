@@ -107,6 +107,52 @@ def server_workspace_creater(path_to_save,workspace_json):
     return None
 
 
+def setup_environment(hosts,path_to_req,server_workspace_ids):
+    """
+    This function will setup the environment for the code execution
+    input: hosts (list of strings),path_to_req (string),server_workspace_ids (list of strings)
+    output: None, installs the packages for the workspace
+    """
+
+    packages_installed=False
+
+    # check if requirments already installed
+    for no,host in enumerate(hosts):
+        try:
+            response = requests.get(f"{host}/workspace/install/check",json={"server_workspace_id":server_workspace_ids[host]})
+            if response.status_code == 200:
+                packages_installed=True
+                print(f"Packages already installed at {host}")
+        except requests.exceptions.HTTPError as errh:
+            print(f"HTTP Error occurred: {errh}")
+        except requests.exceptions.ConnectionError as errc:
+            print(f"Error occurred while connecting: {errc}")
+        except requests.exceptions.Timeout as errt:
+            print(f"Timeout occurred: {errt}")
+
+
+    if not packages_installed:
+
+        for no,host in enumerate(hosts):
+            try:
+                response = requests.post(f"{host}/workspace/install",json={"req_file":open(path_to_req).read(),"server_workspace_id":server_workspace_ids[host]})
+                if response.status_code == 200:
+                    print(f"Packages installed successfully at {host}")
+                elif response.status_code == 500:
+                    print(f"Error occurred at {host} error: {response.json()['error']}")
+                else:
+                    # Handle HTTP errors
+                    response.raise_for_status()
+            except requests.exceptions.HTTPError as errh:
+                print(f"HTTP Error occurred: {errh}")
+            except requests.exceptions.ConnectionError as errc:
+                print(f"Error occurred while connecting: {errc}")
+            except requests.exceptions.Timeout as errt:
+                print(f"Timeout occurred: {errt}")
+
+    return None
+
+
 if __name__ == "__main__":
     json=get_workspace_json("/home/avinash/development/ReddyNet_V2.0","user_workspace")
     

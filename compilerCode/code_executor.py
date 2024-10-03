@@ -98,3 +98,20 @@ def server_par_code_executor(hosts,path_to_req,r,server_workspace_ids):
                 
 
     return None
+
+
+def wait_for_all_hosts_to_complete(r,no_of_hosts):
+    """
+    This function will wait for all hosts to complete the execution.
+    input: r (redis), no_of_hosts (int): number of hosts
+    output: None, waits for all hosts to complete
+    """
+
+    # wait for all hosts to complete the execution
+    while True:
+        if all([r.get(f"flag_for_host_execution_{i}") ==b'2' for i in range(no_of_hosts)]):
+            print("All hosts have completed the execution")
+            break
+        print("Waiting for all hosts to complete the execution")
+
+    return None

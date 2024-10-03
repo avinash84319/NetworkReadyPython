@@ -89,6 +89,9 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_works
 
         # executing the parallel code using servers on the hosts
         code_executor.server_par_code_executor(hosts,path_to_req,r,server_workspace_ids)
+
+        # wait for all hosts to complete the execution
+        code_executor.wait_for_all_hosts_to_complete(r,no_of_hosts)
         
         # merge variables from all hosts
         variable_handler.merge_variables_in_redis_no_of_hosts(r,par_dollar_variables,no_of_hosts,var_type)

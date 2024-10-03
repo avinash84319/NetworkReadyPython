@@ -152,6 +152,33 @@ def setup_environment(hosts,path_to_req,server_workspace_ids):
 
     return None
 
+def delete_workspace_in_hosts(hosts,server_workspace_ids):
+
+    """
+    This function will delete the workspace in the hosts
+    input: hosts (list of strings),server_workspace_ids (list of strings)
+    output: None, deletes the workspace in the hosts
+    """
+
+    for no,host in enumerate(hosts):
+        try:
+            response = requests.post(f"{host}/workspace/delete",json={"server_workspace_id":server_workspace_ids[host]})
+            if response.status_code == 200:
+                print(f"Workspace deleted successfully at {host}")
+            elif response.status_code == 500:
+                print(f"Error occurred at {host} error: {response.json()['error']}")
+            else:
+                # Handle HTTP errors
+                response.raise_for_status()
+        except requests.exceptions.HTTPError as errh:
+            print(f"HTTP Error occurred: {errh}")
+        except requests.exceptions.ConnectionError as errc:
+            print(f"Error occurred while connecting: {errc}")
+        except requests.exceptions.Timeout as errt:
+            print(f"Timeout occurred: {errt}")
+
+    return None
+
 
 if __name__ == "__main__":
     json=get_workspace_json("/home/avinash/development/ReddyNet_V2.0","user_workspace")

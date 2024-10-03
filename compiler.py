@@ -35,6 +35,12 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_works
     # sending workspace to all hosts
     server_workspace_ids=workspace_manager.send_workspace_to_hosts(hosts,path_to_workspace)
 
+    # hosts recalculate, keeping only the hosts which have received the workspace
+    hosts=server_workspace_ids.keys()
+
+    # getting the no of hosts
+    no_of_hosts = len(hosts)
+
     # adding one extra sequential code if the no of sequential and parallel code is not equal
     one_extra_seq = None
 
@@ -86,7 +92,10 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_works
         
         # merge variables from all hosts
         variable_handler.merge_variables_in_redis_no_of_hosts(r,par_dollar_variables,no_of_hosts,var_type)
+
     
+    # delete all the workspaces in hosts after all parallel execution
+    workspace_manager.delete_workspace_in_hosts(hosts,server_workspace_ids)
 
     # if there is an extra sequential code
     if one_extra_seq:

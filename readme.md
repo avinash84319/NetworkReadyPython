@@ -1,6 +1,5 @@
 # Network Ready Python
 
-
 Network Ready Python (NRP) is combination of tools which help python developers, escpecially Data or ML engineers to run distributed python code over multiple devices, without need of virtualization of these devices.
 
 It allows users run thier code on different machines wherever they are in the world. It helps individual developers to share compute resources among themselfs.
@@ -15,6 +14,9 @@ It allows users run thier code on different machines wherever they are in the wo
 - Automatic error handling for errors in remote machines
 
 You just write a simple one file python like code with some NRP tokens added and everything else is managed by NRP from workspace sharing to execution.
+
+## NRP txt file syntax docs :- [Syntax Guide](NRP_Syntax.md)
+This txt file is like one main file which acts as both instruction and user code to run this tool and distributed python.
 
 ## Tech
 

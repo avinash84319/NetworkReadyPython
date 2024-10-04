@@ -125,3 +125,4 @@ And the NRP txt file is like main code which will use all these files to execute
 
 [Python]:https://www.python.org/downloads/
 [Poetry]:https://python-poetry.org/docs/#installation
+[Redis]:https://redis.io/download

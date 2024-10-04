@@ -1,0 +1,17 @@
+{
+    "redis":{
+        "host":"localhost",
+        "port":6379,
+        "db":0
+    },
+    "user_workspace":{
+        "path":"/home/avinash/development/ReddyNet_V2.0/user_workspace",
+        "nrp_file":"input.txt"
+    },
+    "server_workspace":{
+        "path":"/home/avinash/workspaces/serverworkspaces"
+    },
+    "compiler_workspace":{
+        "path":"/home/avinash/workspaces/compilerworkspaces/"
+    }
+}

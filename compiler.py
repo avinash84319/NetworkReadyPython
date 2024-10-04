@@ -1,6 +1,8 @@
 """ 
 This module will run the compiler on the given input file
 """
+import os
+import json
 import sys
 import redis
 import compilerCode.code_handler as code_handler
@@ -12,14 +14,14 @@ import compilerCode.variable_handler as variable_handler
 import compilerCode.environment_setup as environment_setup
 import compilerCode.workspace_manager as workspace_manager
 
-
-def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_workspace="/home/avinash/development/ReddyNet_V2.0/user_workspace"):
+def compile_run(code,r,path_to_workspace,redis_string):
 
     """ 
     This function will compile the given code and run it.
     imputs: code: str: code to be compiled
             r: redis object: redis object
             path_to_workspace: str: path to the usrs workspace where the code is present
+            redis_string: str:it is redis code to be added to the seq and par codes
     """
 
     # removing comments from the code
@@ -67,7 +69,7 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_works
 
 
         # generating the sequential code
-        code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts)
+        code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts,redis_string)
 
         # installing the required packages
         # environment_setup.install_packages(path_to_req)      #until development same directory is used
@@ -85,7 +87,7 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_works
         var_type=variable_handler.divide_variables_in_redis_no_of_hosts(r,seq_dollar_variables,no_of_hosts)
 
         # generating the parallel code
-        code_generator.par_code_generator(par_tokens,par_dollar_variables,par_underscore_variables,imports_packages,no_of_hosts)
+        code_generator.par_code_generator(par_tokens,par_dollar_variables,par_underscore_variables,imports_packages,no_of_hosts,redis_string)
 
         # executing the parallel code using servers on the hosts
         code_executor.server_par_code_executor(hosts,path_to_req,r,server_workspace_ids)
@@ -98,7 +100,7 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_works
 
     
     # delete all the workspaces in hosts after all parallel execution
-    workspace_manager.delete_workspace_in_hosts(hosts,server_workspace_ids)
+    # workspace_manager.delete_workspace_in_hosts(hosts,server_workspace_ids)
 
     # if there is an extra sequential code
     if one_extra_seq:
@@ -114,7 +116,7 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_works
         seq_underscore_variables = tokenizer.get_variables_list(seq_underscore_variables_linewise)
 
         # generating the sequential code
-        code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts)
+        code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts,redis_string)
 
         # installing the required packages
         # environment_setup.compile_install_packages(path_to_req)      #until development same directory is used
@@ -127,12 +129,20 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_works
 
 if __name__ == "__main__":
     print("Compiler started")
+
+    # read config json
+    with open("config.json","r") as f:
+        config_json=f.read()
+
+    config_json=json.loads(config_json)
+
     #redis
-    red = redis.Redis(host='localhost', port=6379, db=0)
-    path_to_workspace=sys.argv[1]
-    input_file=sys.argv[2] if len(sys.argv)>2 else "input.txt"
+    red = redis.Redis(host=config_json['redis']['host'], port=config_json['redis']['port'], db=config_json['redis']['db'])
+    path_to_workspace=config_json['user_workspace']['path']
+    input_file=config_json['user_workspace']['nrp_file']
+    redis_string=f'r = redis.Redis(host="{config_json["redis"]["host"]}", port="{config_json["redis"]["port"]}")\n'
     # Read the input file
     with open(path_to_workspace+"/"+input_file, 'r',encoding='utf-8') as file:
         input_file = file.read()
-    compile_run(input_file,red,path_to_workspace)
+    compile_run(input_file,red,path_to_workspace,redis_string)
     

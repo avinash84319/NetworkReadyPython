@@ -33,6 +33,12 @@ Note ! :- Currently this supports only linux environment ( windows support comin
 
 Note ! :- Use virtual machines as much as possible if you dont know the code biegn executed by the server for safety . ( server can run code recieved from other users if ipaddress and ports are known)
 
+## Redis server ( install anywhere )
+
+Redis server is used to synchronyse and fetch variables from and to remote machines. This server can be hosted anywhere but by default in this code it is in localhost .
+
+Install [Redis]
+
 ## Installation ( Server at remote machines )
 
 - Python

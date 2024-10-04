@@ -5,10 +5,16 @@ This file contains the code to generate the code for the given code block
 from compilerCode import tokenizer
 
 import os
+import json
 
-workspace_data_path="/home/avinash/workspaces/compilerworkspaces/"
+# read config json
+with open("config.json","r") as f:
+    config_json=f.read()
+config_json=json.loads(config_json)
 
-def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts):
+workspace_data_path=config_json['compiler_workspace']['path']
+
+def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts,redis_string):
 
     """
     This function will add necessary code to the given sequential code to execute
@@ -18,6 +24,7 @@ def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,im
             seq_underscore_variables (list of strings)
             imports_packages (strings)
             hosts (list of strings)
+            redis_string
     output: seq_code.py file with necessary code to execute the given code
     """
     
@@ -39,7 +46,7 @@ def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,im
 
         # writing redis import statement
         file.write("import redis\n")
-        file.write("r = redis.Redis(host='localhost', port=6379)\n")
+        file.write(redis_string)
 
         # writing the code to set the flags for the host execution
         # since this is sequential code and parallel code will execute after this setting all to 0
@@ -69,7 +76,7 @@ def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,im
         for i in range(len(variables)):
             file.write(f"r.set('{str(variables[i][2:])}',data_serializer.serialize_data({variables[i][2:]}))\n")
     
-def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,imports_packages,no_of_hosts):
+def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,imports_packages,no_of_hosts,redis_string):
     """
     This function will execute the given code
     input: tokens (list of list of strings)
@@ -77,6 +84,7 @@ def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,impo
            par_underscore_variables (list of strings)
            imports_packages (strings)
            no_of_hosts (int)
+           redis_string
     output: par_code.py file with necessary code to execute the given code
     """
 
@@ -104,7 +112,7 @@ def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,impo
 
             # writing redis import statement
             file.write("import redis\n")
-            file.write("r = redis.Redis(host='localhost', port=6379)\n")
+            file.write(redis_string)
 
             # writing the code to set the flag for the host execution
             file.write(f"r.set('flag_for_host_execution_{no}',1)\n")

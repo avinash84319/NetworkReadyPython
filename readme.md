@@ -31,7 +31,40 @@ Note ! :- Currently this supports only linux environment ( windows support comin
 
 Note ! :- Use virtual machines as much as possible if you dont know the code biegn executed by the server for safety . ( server can run code recieved from other users if ipaddress and ports are known)
 
-## Installation ( Server )
+## Installation ( Server at remote machines )
+
+- Python
+   Install [Python]
+- Poetry
+   Install [Poetry]
+- NRP code
+  Git clone this repo
+    ```sh
+    git clone https://github.com/avinash84319/NetworkReadyPython
+    ```
+- Poetry setup
+     ```sh
+     poetry install
+     ```
+- Environment
+    ```sh
+    poetry shell
+    ```
+    or use this brfore every command
+    ```sh
+    poetry run
+    ```
+- Run Flask Server
+    ```sh
+    flask --app servernode.py run --port 5000
+    ```
+This will create a flask server on the current machine which can accept distributed code to be run on this machine. ( do this wherever you want to run distributed code )
+
+## Usage ( compiler at main machine )
+
+Although the name is compiler it is not typical compiler , it just takes the NRP code converts it into suitable python code and manages everything else.
+
+Note! :- Install everything which is needed for server in main machine also.
 
 - Python
    Install [Python]
@@ -54,16 +87,19 @@ Note ! :- Use virtual machines as much as possible if you dont know the code bie
     ```sh
     poetry run
     ```
-- Run Flask Server
-    ```sh
-    flask --app servernode.py run --port 5000
-    ```
-This will create a flask server on the current machine which can accept distributed code to be run on this machine.
-
-
-    
-    
- 
+- Run compiler
+   ```sh
+   python compiler.py <path to user workspace> <name of NRP txt file>
+   ```
+   for example
+   ```sh
+   python compiler.py /home/avinash/development/ReddyNet_V2.0/user_workspace input.txt
+   ```
+This will run the compiler and execute the code in all the remote machines specified in the NRP code.
+The compiler makes all the HTTP requests to remote machine's NRP Flask servers for the execution.
+   
+Here the user workspace is Directory with all the necescary code files and modules to run the users code.
+And the NRP txt file is like main code which will use all these files to execute.
 
 [Python]:https://www.python.org/downloads/
 [Poetry]:https://python-poetry.org/docs/#installation

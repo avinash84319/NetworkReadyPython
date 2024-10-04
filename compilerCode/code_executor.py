@@ -1,12 +1,14 @@
 """
 This module is responsible for executing the code in different modes.
 """
-
+from compilerCode import workspace_manager
 
 import json
 import requests
 import concurrent.futures
 
+
+workspace_data_path="/home/avinash/workspaces/compilerworkspaces/"
 
 def seq_code_execute(r):
     """
@@ -16,23 +18,27 @@ def seq_code_execute(r):
     """
 
     # executing the code
-    exec("".join(open('seq_cd/seq_code.py').read()),{})
+    exec("".join(open(workspace_data_path+'seq_cd/seq_code.py').read()),{})
 
     return None
 
-def server_par_code_executor(hosts,path_to_req,r):
+def server_par_code_executor(hosts,path_to_req,r,server_workspace_ids):
     """
     This function will execute the parallel user code.
     input:hosts list of strings, reads the code from par_code.py
           path_to_req: string: path to requirements.txt
           r: redis
+         server_workspace_ids: list of strings: ids of the server workspaces
     output:None, output at the desired location
     """
+
+    # setup environment for the code execution
+    workspace_manager.setup_environment(hosts,path_to_req,server_workspace_ids)
 
     # executing the code on hosts concurrently by sending the par files to the hosts
     
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = [executor.submit(requests.post,f"{host}/execute",files={'code_file':open(f'par_cd/par_code_{i}.py','rb'),'req_file':open(path_to_req,'rb')}) for i,host in enumerate(hosts)]
+        results = [executor.submit(requests.post,f"{host}/execute",json={'code_file':open(workspace_data_path+f'par_cd/par_code_{i}.py').read(),"server_workspace_id":server_workspace_ids[host]}) for i,host in enumerate(hosts)]
         
         # checking the results
         for f in concurrent.futures.as_completed(results):
@@ -42,6 +48,7 @@ def server_par_code_executor(hosts,path_to_req,r):
                     print(f"Code executed successfully at {response.url}")
                 elif response.status_code == 500:
                     print(f"Error occurred at {response.url} error: {response.json()['error']}")
+                    raise Exception(f"Error occurred at {response.url} error: {response.json()['error']}")
                 else:
                     # Handle HTTP errors
                     response.raise_for_status()
@@ -70,7 +77,7 @@ def server_par_code_executor(hosts,path_to_req,r):
                     print(f"Trying second pass for {host}'s code in {new_host}") 
                     # send the code to the new host
                     try:
-                        requests.post(f"{new_host}/execute",files={'code_file':open(f'par_cd/par_code_{no}.py','rb'),'req_file':open(path_to_req,'rb')})
+                        requests.post(f"{new_host}/execute",json={'code_file':open(workspace_data_path+f'par_cd/par_code_{no}.py').read(),"server_workspace_id":server_workspace_ids[host]})
                     except requests.exceptions.HTTPError as errh:
                         print(f"HTTP Error occurred: {errh} at {new_host}")
                     except requests.exceptions.ConnectionError as errc:
@@ -89,5 +96,22 @@ def server_par_code_executor(hosts,path_to_req,r):
                         exit()
 
                 
+
+    return None
+
+
+def wait_for_all_hosts_to_complete(r,no_of_hosts):
+    """
+    This function will wait for all hosts to complete the execution.
+    input: r (redis), no_of_hosts (int): number of hosts
+    output: None, waits for all hosts to complete
+    """
+
+    # wait for all hosts to complete the execution
+    while True:
+        if all([r.get(f"flag_for_host_execution_{i}") ==b'2' for i in range(no_of_hosts)]):
+            print("All hosts have completed the execution")
+            break
+        print("Waiting for all hosts to complete the execution")
 
     return None

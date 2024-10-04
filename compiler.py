@@ -1,6 +1,7 @@
 """ 
 This module will run the compiler on the given input file
 """
+import sys
 import redis
 import compilerCode.code_handler as code_handler
 import compilerCode.tokenizer as tokenizer
@@ -9,14 +10,16 @@ import compilerCode.code_executor as code_executor
 import compilerCode.code_verifier as code_verifier
 import compilerCode.variable_handler as variable_handler
 import compilerCode.environment_setup as environment_setup
+import compilerCode.workspace_manager as workspace_manager
 
 
-def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
+def compile_run(code="",r=redis.Redis(host='localhost', port=6379),path_to_workspace="/home/avinash/development/ReddyNet_V2.0/user_workspace"):
 
     """ 
     This function will compile the given code and run it.
     imputs: code: str: code to be compiled
-            r: redis object: redis object 
+            r: redis object: redis object
+            path_to_workspace: str: path to the usrs workspace where the code is present
     """
 
     # removing comments from the code
@@ -29,8 +32,17 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
     # getting the no of hosts
     no_of_hosts = len(hosts)
 
+    # sending workspace to all hosts
+    server_workspace_ids=workspace_manager.send_workspace_to_hosts(hosts,path_to_workspace)
+
+    # hosts recalculate, keeping only the hosts which have received the workspace
+    hosts=server_workspace_ids.keys()
+
+    # getting the no of hosts
+    no_of_hosts = len(hosts)
+
     # adding one extra sequential code if the no of sequential and parallel code is not equal
-    ope_extra_seq = None
+    one_extra_seq = None
 
     if len(multi_sequential_code) != len(multi_parallel_code):
         one_extra_seq = multi_sequential_code[-1]
@@ -69,18 +81,24 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
         # verify variables to be list,numpy or pandas dfs
         code_verifier.verify_dollar_variables(r,seq_dollar_variables)
 
-        # devide and save variables for each host
+        # devide and save variables for each host and get var type in a list,numpy or pandas dfs
         var_type=variable_handler.divide_variables_in_redis_no_of_hosts(r,seq_dollar_variables,no_of_hosts)
 
         # generating the parallel code
         code_generator.par_code_generator(par_tokens,par_dollar_variables,par_underscore_variables,imports_packages,no_of_hosts)
 
         # executing the parallel code using servers on the hosts
-        code_executor.server_par_code_executor(hosts,path_to_req,r)
+        code_executor.server_par_code_executor(hosts,path_to_req,r,server_workspace_ids)
+
+        # wait for all hosts to complete the execution
+        code_executor.wait_for_all_hosts_to_complete(r,no_of_hosts)
         
         # merge variables from all hosts
         variable_handler.merge_variables_in_redis_no_of_hosts(r,par_dollar_variables,no_of_hosts,var_type)
+
     
+    # delete all the workspaces in hosts after all parallel execution
+    workspace_manager.delete_workspace_in_hosts(hosts,server_workspace_ids)
 
     # if there is an extra sequential code
     if one_extra_seq:
@@ -99,20 +117,22 @@ def compile_run(code="",r=redis.Redis(host='localhost', port=6379)):
         code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts)
 
         # installing the required packages
-        # environment_setup.install_packages(path_to_req)      #until development same directory is used
+        # environment_setup.compile_install_packages(path_to_req)      #until development same directory is used
 
         # executing the sequential code
         code_executor.seq_code_execute(r)
 
         # removing the installed packages
-        # environment_setup.remove_packages(path_to_req)      #until development same directory is used
+        # environment_setup.compile_remove_packages(path_to_req)      #until development same directory is used
 
 if __name__ == "__main__":
     print("Compiler started")
     #redis
     red = redis.Redis(host='localhost', port=6379, db=0)
+    path_to_workspace=sys.argv[1]
+    input_file=sys.argv[2] if len(sys.argv)>2 else "input.txt"
     # Read the input file
-    with open('input.txt', 'r',encoding='utf-8') as file:
+    with open(path_to_workspace+"/"+input_file, 'r',encoding='utf-8') as file:
         input_file = file.read()
-    compile_run(input_file,red)
+    compile_run(input_file,red,path_to_workspace)
     

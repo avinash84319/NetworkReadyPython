@@ -33,6 +33,21 @@ Note ! :- Currently this supports only linux environment ( windows support comin
 
 Note ! :- Use virtual machines as much as possible if you dont know the code biegn executed by the server for safety . ( server can run code recieved from other users if ipaddress and ports are known)
 
+## Config.json
+
+- redis :- information for redis server
+- user_workspace :- where user project directory is present
+- serve_workspcae :- where server creates required files when running code
+- compiler_workspace :- where compiler creates and stores important code files for it to run
+
+## Redis server ( install anywhere )
+
+Redis server is used to synchronyse and fetch variables from and to remote machines. This server can be hosted anywhere but by default in this code it is in localhost .
+
+Note! :- checkout config.json file and change according to your needs.
+
+Install [Redis]
+
 ## Installation ( Server at remote machines )
 
 - Python
@@ -56,6 +71,9 @@ Note ! :- Use virtual machines as much as possible if you dont know the code bie
     ```sh
     poetry run
     ```
+
+- Note! :- checkout config.json file and change according to your needs.
+
 - Run Flask Server
     ```sh
     flask --app servernode.py run --port 5000
@@ -89,6 +107,8 @@ Note! :- Install everything which is needed for server in main machine also.
     ```sh
     poetry run
     ```
+- Note! :- checkout config.json file and change according to your needs.
+
 - Run compiler
    ```sh
    python compiler.py <path to user workspace> <name of NRP txt file>

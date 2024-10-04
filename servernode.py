@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import uuid
 import os
+import json
 
 import compilerCode.code_executor as code_executor
 import compilerCode.environment_setup as environment_setup
@@ -8,7 +9,12 @@ import compilerCode.workspace_manager as workspace_manager
 
 app = Flask(__name__)
 
-workspace_data_path="/home/avinash/workspaces/serverworkspaces"
+# read config json
+with open("config.json","r") as f:
+    config_json=f.read()
+config_json=json.loads(config_json)
+
+workspace_data_path=config_json['server_workspace']['path']
 
 if not os.path.exists(workspace_data_path):
     os.makedirs(workspace_data_path)

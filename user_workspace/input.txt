@@ -34,7 +34,7 @@ print($$a[:10])
 print("parallel done")
 |||
 
----
+---3
 # this is a sequential code
 $$a=np.array([x*??b for x in $$a])
 print($$a[:10])
@@ -46,7 +46,7 @@ print("sequential done")
 $$a=np.array([x*??b for x in $$a])
 print($$a[:10])
 print("parallel done")
-|||
+|||3
 
 ---
 # this is a sequential code

@@ -27,6 +27,8 @@ def compile_run(code,r,path_to_workspace,redis_string):
     # removing comments from the code
     code=code_handler.remove_comments(code)
 
+    # multiply the blocks in the code according to multipliers
+    code=code_handler.multiply_blocks(code)
 
     # separating the different components in the code
     hosts,multi_sequential_code,multi_parallel_code,path_to_req,imports_packages = code_handler.separate_code(code)

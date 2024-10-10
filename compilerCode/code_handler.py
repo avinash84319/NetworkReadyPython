@@ -151,3 +151,69 @@ def separate_code(code):
     hosts = [i[1:-1] for i in hosts if i!=""]
 
     return hosts,multi_sequential_code,multi_parallel_code,path_to_req,"\n".join(imports_packages)
+
+def multiply_blocks(code):
+
+    """
+    This function will multiply the sequential and parallel code blocks if user has used syntax
+    input: code (string)
+    output: code (string)
+    """
+
+    code = code.split("\n")
+    code = [i for i in code if i]
+
+    new_code = []
+
+    multiplier_stack = []
+    code_block_stack = []
+
+
+    for line in code:
+
+        if "---" in line and len(line)>3:
+
+            try:
+                no=int(line[3:])
+            except:
+                print(f"Syntax error in the code {line[3:]} not integer")
+                exit()
+
+            multiplier_stack.append(no)
+            code_block_stack.append(["---"])
+
+        elif "|||" in line and len(line)>3:
+                
+            try:
+                no=int(line[3:])
+            except:
+                print(f"Syntax error in the code {line[3:]} not integer")
+                exit()
+
+            print(multiplier_stack, no)
+        
+            if len(multiplier_stack) == 0:
+                print(" multiplier in parallel block without multiplier in sequential block")
+                exit()
+
+            if multiplier_stack[-1]!= no:
+                print("multiplier in sequential block and parallel block not equal")
+                exit()
+
+            else :
+                multiplier_stack.pop()
+                code_block_stack[-1].append("|||")
+                new_code.append(("\n".join(code_block_stack[-1])+ "\n")*no)
+                code_block_stack.pop()
+
+        else:
+            if len(multiplier_stack) == 0:
+                new_code.append(line)
+            else:
+                code_block_stack[-1].append(line)
+
+    if len(multiplier_stack) != 0:
+        print("some error due to multiplier")
+        exit()
+
+    return "\n".join(new_code)

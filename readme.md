@@ -111,11 +111,7 @@ Note! :- Install everything which is needed for server in main machine also.
 
 - Run compiler
    ```sh
-   python compiler.py <path to user workspace> <name of NRP txt file>
-   ```
-   for example
-   ```sh
-   python compiler.py /home/avinash/development/ReddyNet_V2.0/user_workspace input.txt
+   python compiler.py 
    ```
 This will run the compiler and execute the code in all the remote machines specified in the NRP code.
 The compiler makes all the HTTP requests to remote machine's NRP Flask servers for the execution.

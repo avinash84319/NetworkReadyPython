@@ -7,8 +7,12 @@ import json
 import requests
 import concurrent.futures
 
+# read config json
+with open("config.json","r") as f:
+    config_json=f.read()
+config_json=json.loads(config_json)
 
-workspace_data_path="/home/avinash/workspaces/compilerworkspaces/"
+workspace_data_path=config_json['compiler_workspace']['path']
 
 def seq_code_execute(r):
     """

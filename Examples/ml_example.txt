@@ -1,0 +1,130 @@
+***
+# these are host on which servernodes are running
+"http://localhost:3000/",
+"http://localhost:5000/",
+"http://localhost:4000/",
+***
+
+>>>
+# this will be the path to the requirments.txt file 
+/home/avinash/development/ReddyNet_V2.0/reqfake.txt
+>>>
+
+^^^
+# this will be import statements
+import numpy as np
+import tensorflow as tf
+^^^
+
+---
+
+
+X_train = tf.keras.datasets.mnist.load_data()[0][0]
+Y_train = tf.keras.datasets.mnist.load_data()[0][1]
+
+
+# 60000, 28, 28 into 3 batches of 20000, 28, 28
+
+X_train = np.array_split(X_train, 3)
+Y_train = np.array_split(Y_train, 3)
+
+$$batches = [ (X_train[i], Y_train[i]) for i in range(3) ]
+
+#model defination
+
+model = tf.keras.models.Sequential([
+    tf.keras.layers.Flatten(input_shape=(28, 28)),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(10,activation='softmax')
+])
+
+??model.compile(optimizer='adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+---
+
+|||
+
+X_train = $$batches[0][0]
+Y_train = $$batches[0][1]
+
+#mini_batch = 32
+#
+#gradients=[]
+#
+#for i in range(0, len(X_train), mini_batch):
+#
+#    with tf.gradientTape() as tape:
+#        logits = ??model(X_train[i:i+mini_batch])
+#        loss_value = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)(Y_train[i:i+mini_batch], logits)
+#
+#    grads = tape.gradient(loss_value, model.trainable_weights)
+#
+#    gradients.append(grads)
+
+with tf.GradientTape() as tape:
+    logits = ??model(X_train)
+    loss_value = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)(Y_train, logits)
+
+    gradients = tape.gradient(loss_value, model.trainable_weights)
+
+$$gradients = gradients
+
+|||
+
+---5
+
+#applying to model all the gradients
+
+??model.optimizer.apply_gradients(zip($$gradients, model.trainable_weights))
+
+---
+
+|||
+
+X_train = $$batches[0][0]
+Y_train = $$batches[0][1]
+
+#mini_batch = 32
+#
+#gradients=[]
+#
+#for i in range(0, len(X_train), mini_batch):
+#
+#    with tf.gradientTape() as tape:
+#        logits = ??model(X_train[i:i+mini_batch])
+#        loss_value = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)(Y_train[i:i+mini_batch], logits)
+#
+#    grads = tape.gradient(loss_value, model.trainable_weights)
+#
+#    gradients.append(grads)
+
+with tf.GradientTape() as tape:
+    logits = ??model(X_train)
+    loss_value = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)(Y_train, logits)
+
+gradients = tape.gradient(loss_value, model.trainable_weights)
+
+$$gradients = gradients
+
+|||5
+
+---
+
+#applying to model all the gradients for last time
+
+??model.optimizer.apply_gradients(zip($$gradients, model.trainable_weights))
+
+
+#testing the model
+
+X_test = tf.keras.datasets.mnist.load_data()[1][0]
+Y_test = tf.keras.datasets.mnist.load_data()[1][1]
+
+??model.evaluate(X_test, Y_test, verbose=2)
+
+print("Model has been trained successfully")
+
+model.save('model.h5')
+---

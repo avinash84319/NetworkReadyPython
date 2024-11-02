@@ -137,7 +137,12 @@ def merge_list_variables_in_redis_no_of_hosts(r,variables,no_of_hosts):
         for i in range(no_of_hosts):
             variable_part = r.get(f"{variable[2:]}${i}")
             variable_part = data_serializer.deserialize_data(variable_part)
-            variable_value.extend(variable_part)
+
+            if variable_part==None:
+                print(f"variable {variable[2:]}${i} is None")
+                continue
+            else:
+                variable_value.extend(variable_part)
 
         print(f"value of {variable} after par execution: {variable_value[:10]} ... ")
 

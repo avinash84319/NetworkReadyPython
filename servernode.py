@@ -46,6 +46,7 @@ def workspace():
     try:
         workspace_manager.server_workspace_creater(path_to_save, workspace_json)
     except Exception as e:
+        print(e)
         return jsonify({"error": str(e)}), 500
 
     return jsonify({"message": "Workspace created successfully", "id": id})

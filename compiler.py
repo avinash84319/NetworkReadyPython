@@ -74,13 +74,13 @@ def compile_run(code,r,path_to_workspace,redis_string):
         code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts,redis_string)
 
         # installing the required packages
-        # environment_setup.install_packages(path_to_req)      #until development same directory is used
+        environment_setup.compile_install_packages(path_to_req)      #until development same directory is used
 
         # executing the sequential code
         code_executor.seq_code_execute(r)
 
         # removing the installed packages
-        # environment_setup.remove_packages(path_to_req)      #until development same directory is used
+        # environment_setup.compile_remove_packages(path_to_req)      #until development same directory is used
         
         # verify variables to be list,numpy or pandas dfs
         code_verifier.verify_dollar_variables(r,seq_dollar_variables)

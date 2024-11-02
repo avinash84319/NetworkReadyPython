@@ -30,6 +30,10 @@ def deserialize_data(data,option=2):
     output: data (value of data)
     """
 
+    if data == None:
+        print("No data to deserialize")
+        return None
+
     if option ==0:
         return json.loads(data)
     elif option ==1:

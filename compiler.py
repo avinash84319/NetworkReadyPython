@@ -143,10 +143,6 @@ if __name__ == "__main__":
     path_to_workspace=config_json['user_workspace']['path']
     input_file=config_json['user_workspace']['nrp_file']
     redis_string=f'r = redis.Redis(host="{config_json["redis"]["host"]}", port="{config_json["redis"]["port"]}")\n'
-
-    # clear the redis storage
-    red.flushdb()
-
     # Read the input file
     with open(path_to_workspace+"/"+input_file, 'r',encoding='utf-8') as file:
         input_file = file.read()

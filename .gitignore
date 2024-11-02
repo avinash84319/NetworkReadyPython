@@ -4,4 +4,3 @@ server_cd
 __pycache__/
 user_workspace/
 server_workspace/
-*.h5

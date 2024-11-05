@@ -25,4 +25,5 @@ stop_process_on_port() {
 # Stop processes on port 3000 and 5000
 stop_process_on_port 3000
 stop_process_on_port 5000
+stop_process_on_port 4000
 

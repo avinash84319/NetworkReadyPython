@@ -6,4 +6,7 @@
 # Second server
 (poetry run flask --app servernode.py --debug run --port 5000) &
 
+# Third server
+(poetry run flask --app servernode.py --debug run --port 4000) &
+
 

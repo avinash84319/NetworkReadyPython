@@ -14,7 +14,7 @@ import compilerCode.variable_handler as variable_handler
 import compilerCode.environment_setup as environment_setup
 import compilerCode.workspace_manager as workspace_manager
 
-def compile_run(code,r,path_to_workspace,redis_string):
+def compile_run(code,r,path_to_workspace,redis_string,rerun):
 
     """ 
     This function will compile the given code and run it.
@@ -36,8 +36,26 @@ def compile_run(code,r,path_to_workspace,redis_string):
     # getting the no of hosts
     no_of_hosts = len(hosts)
 
-    # sending workspace to all hosts
-    server_workspace_ids=workspace_manager.send_workspace_to_hosts(hosts,path_to_workspace)
+    if not rerun:
+
+        # control should come here only if rerun is set to False
+        # That means user wants to delete the existing workspaces and create new ones
+        # sending workspace to all hosts
+        server_workspace_ids=workspace_manager.send_workspace_to_hosts(hosts,path_to_workspace)
+
+    else:
+
+        # control should come here only if rerun is set to True
+        # That means user wants to reuse the existing workspaces in the hosts
+        # But some hosts may not have the workspace ids, so we need to send the workspace to those hosts
+        # using the existing workspace ids
+        print(f"Using the existing workspace ids, rerun is set to {rerun}")
+
+        # getting the workspace ids from the file
+        server_workspace_ids=workspace_manager.get_workspace_ids_from_file_or_hosts(hosts,path_to_workspace)
+
+    # save the workspace ids for future reuse
+    workspace_manager.save_workspace_ids(server_workspace_ids)
 
     # hosts recalculate, keeping only the hosts which have received the workspace
     hosts=server_workspace_ids.keys()
@@ -100,10 +118,6 @@ def compile_run(code,r,path_to_workspace,redis_string):
         # merge variables from all hosts
         variable_handler.merge_variables_in_redis_no_of_hosts(r,par_dollar_variables,no_of_hosts,var_type)
 
-    
-    # delete all the workspaces in hosts after all parallel execution
-    workspace_manager.delete_workspace_in_hosts(hosts,server_workspace_ids)
-
     # if there is an extra sequential code
     if one_extra_seq:
 
@@ -129,6 +143,17 @@ def compile_run(code,r,path_to_workspace,redis_string):
         # removing the installed packages
         # environment_setup.compile_remove_packages(path_to_req)      #until development same directory is used
 
+    if not rerun:
+
+        print("Deleting the workspaces in the hosts")
+    
+        # delete all the workspaces in hosts after all parallel execution
+        workspace_manager.delete_workspace_in_hosts(hosts,server_workspace_ids)
+
+    else:
+
+        print(f"Workspaces are not deleted since rerun is set to {rerun}")
+
 if __name__ == "__main__":
     print("Compiler started")
 
@@ -143,8 +168,14 @@ if __name__ == "__main__":
     path_to_workspace=config_json['user_workspace']['path']
     input_file=config_json['user_workspace']['nrp_file']
     redis_string=f'r = redis.Redis(host="{config_json["redis"]["host"]}", port="{config_json["redis"]["port"]}")\n'
+
     # Read the input file
     with open(path_to_workspace+"/"+input_file, 'r',encoding='utf-8') as file:
         input_file = file.read()
-    compile_run(input_file,red,path_to_workspace,redis_string)
+
+    # config['rerun'] is set to True if the workspaces are to be reused
+    # This is useful when the code is to be rerun multiple times, and the workspaces are not to be deleted
+    rerun = True if config_json['rerun']=="True" else False
+
+    compile_run(input_file,red,path_to_workspace,redis_string,rerun)
     

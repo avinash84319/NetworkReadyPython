@@ -5,6 +5,14 @@ This module will contain all the functions to handle the workspace in hosts
 
 import os
 import requests
+import json
+
+# read config json
+with open("config.json","r") as f:
+    config_json=f.read()
+config_json=json.loads(config_json)
+
+workspace_data_path=config_json['compiler_workspace']['path']
 
 def send_workspace_to_hosts(hosts,workspace_path):
     """
@@ -187,4 +195,91 @@ if __name__ == "__main__":
     os.system("rm -rf /home/avinash/development/ReddyNet_V2.0/server_workspace/*")
 
     server_workspace_creater("/home/avinash/development/ReddyNet_V2.0/server_workspace",json)
+
+
+def save_workspace_ids(server_workspace_ids):
+    """
+    This function will save the workspace ids in a file, so that workspaces in the hosts can be reused,
+    This function must only be called based on the user flag while running the main compiler
+    If this function is called, then the workspaces also must not be deleted
+    input: server_workspace_ids (dict)
+    output: None, saves the workspace ids in a file in compiler workspace
+    """
+
+    path = workspace_data_path+"/server_workspace_ids.json"
+
+    with open(path,"w") as f:
+        f.write(json.dumps(server_workspace_ids))
+
+    print(f"Workspace ids saved successfully to {path}")
+
+    return None
+
+def get_workspace_ids_from_file_or_hosts(hosts,workspace_path):
+    """
+    This function will get the workspace ids from the file or from the hosts based on scenario
+    input: hosts (list of strings),workspace_path (string)
+    output: server_workspace_ids (dict), gets the workspace ids from the file or from the hosts
+    """
+
+    path = workspace_data_path+"/server_workspace_ids.json"
+
+    # check if the file exists
+    if os.path.exists(path):
+
+        # read the workspace ids from the file
+        with open(path,"r") as f:
+            server_workspace_ids=json.loads(f.read())
+
+        workspace_not_present_but_in_file=[]
+
+        # check if the workspaces are present in the hosts
+        # if not present, then just remove the workspace id from the dict, the workspace will be sent again in next block
+        for host in server_workspace_ids.keys():
+            try:
+                response = requests.get(f"{host}/workspace/check",json={"server_workspace_id":server_workspace_ids[host]})
+                if response.status_code == 200:
+                    response_json = response.json()
+                    if response_json.get("workspace_present"):
+                        print(f"Reusing Workspace present in {host}")
+                    else:
+                        # workspace not present in the host
+                        workspace_not_present_but_in_file.append(host)
+                else:
+                    # workspace not present in the host
+                    workspace_not_present_but_in_file.append(host)
+                    print(f"Error occurred at {host} error: {response.json()['error']}")
+                    # Handle HTTP errors
+                    response.raise_for_status()
+            except requests.exceptions.HTTPError as errh:
+                print(f"HTTP Error occurred: {errh}")
+            except requests.exceptions.ConnectionError as errc:
+                print(f"Error occurred while connecting: {errc}")
+            except requests.exceptions.Timeout as errt:
+                print(f"Timeout occurred: {errt}")
+
+        # remove the workspace ids which are not present in the hosts
+        for host in workspace_not_present_but_in_file:
+            del server_workspace_ids[host]
+
+        # check if all the availaible hosts are present in the workspace ids
+        if set(hosts) != set(server_workspace_ids.keys()):
+            
+            # send the workspace to the hosts which are not present in the workspace ids
+            server_workspace_ids_new=send_workspace_to_hosts(list(set(hosts)-set(server_workspace_ids.keys())),workspace_path)
+
+            # merge the new workspace ids with the existing workspace ids
+            for key in server_workspace_ids_new.keys():
+                server_workspace_ids[key]=server_workspace_ids_new[key]
+
+            print("Workspace ids updated successfully")
+    else:
+
+        # file not found, so no workspace ids
+        print("file not found for workspace ids, sending the workspace again to the hosts")
+
+        # send the workspace to all the hosts
+        server_workspace_ids=send_workspace_to_hosts(hosts,workspace_path)
+
+    return server_workspace_ids
 

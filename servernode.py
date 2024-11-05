@@ -93,23 +93,27 @@ def install():
     outputs: message: str: message of the installation
     """
 
-    req_file = request.json['req_file']
-    id = request.json['server_workspace_id']
+    try:
+        req_file = request.json['req_file']
+        id = request.json['server_workspace_id']
 
-    if not os.path.exists(workspace_data_path+"/"+id):
-        os.makedirs(workspace_data_path+"/"+id)
+        if not os.path.exists(workspace_data_path+"/"+id):
+            os.makedirs(workspace_data_path+"/"+id)
 
-    # check directory of user workspace
-    user_workspace = os.listdir(workspace_data_path+"/"+id)[0]
+        # check directory of user workspace
+        user_workspace = os.listdir(workspace_data_path+"/"+id)[0]
 
-    # write the req_file to the req.txt
-    with open(workspace_data_path+"/"+id+"/"+user_workspace+"/req.txt", "w") as file:
-        file.write(req_file)
+        # write the req_file to the req.txt
+        with open(workspace_data_path+"/"+id+"/"+user_workspace+"/req.txt", "w") as file:
+            file.write(req_file)
 
-    # setting up the environment
-    environment_setup.server_install_packages(workspace_data_path+"/"+id+"/"+user_workspace+"/req.txt")
+        # setting up the environment
+        environment_setup.server_install_packages(workspace_data_path+"/"+id+"/"+user_workspace+"/req.txt")
 
-    return jsonify({"message": "Packages installed successfully"})
+        return jsonify({"message": "Packages installed successfully"})
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/execute", methods=["POST"])
@@ -163,6 +167,24 @@ def execute():
     # environment_setup.server_remove_packages(workspace_data_path+"/"+id+"/"+user_workspace+"/req.txt")  #while development same directory is used
     
     return jsonify({"message": "Code executed successfully"})
+
+@app.route("/workspace/check", methods=["GET"])
+def check_workspace():
+    """
+    This function will check if the workspace exists
+    inputs: id: str: id of the workspace
+    outputs: message: str: message of the workspace existence
+    """
+    id = request.json['server_workspace_id']
+
+    if not os.path.exists(workspace_data_path):
+        print("Server workspace directory does not exist")
+        return jsonify({"error": "Server path does not exist"}), 500
+
+    if not os.path.exists(workspace_data_path+"/"+id):
+        return jsonify({"workspace_present": False}), 200
+
+    return jsonify({"workspace_present": True}), 200    
 
 
 if __name__ == "__main__":

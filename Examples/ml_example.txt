@@ -43,20 +43,6 @@ model = tf.keras.models.Sequential([
 X_train = [ train_set[0] in for train_set in $$batches ]
 Y_train = [ train_set[1] in for train_set in $$batches ]
 
-#mini_batch = 32
-#
-#gradients=[]
-#
-#for i in range(0, len(X_train), mini_batch):
-#
-#    with tf.gradientTape() as tape:
-#        logits = ??model(X_train[i:i+mini_batch])
-#        loss_value = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)(Y_train[i:i+mini_batch], logits)
-#
-#    grads = tape.gradient(loss_value, model.trainable_weights)
-#
-#    gradients.append(grads)
-
 with tf.GradientTape() as tape:
     logits = ??model(X_train)
     loss_value = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)(Y_train, logits)
@@ -79,20 +65,6 @@ $$gradients = gradients
 
 X_train = [ train_set[0] in for train_set in $$batches ]
 Y_train = [ train_set[1] in for train_set in $$batches ]
-
-#mini_batch = 32
-#
-#gradients=[]
-#
-#for i in range(0, len(X_train), mini_batch):
-#
-#    with tf.gradientTape() as tape:
-#        logits = ??model(X_train[i:i+mini_batch])
-#        loss_value = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)(Y_train[i:i+mini_batch], logits)
-#
-#    grads = tape.gradient(loss_value, model.trainable_weights)
-#
-#    gradients.append(grads)
 
 with tf.GradientTape() as tape:
     logits = ??model(X_train)

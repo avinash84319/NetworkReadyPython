@@ -60,6 +60,14 @@ def delete_workspace():
     """
     id = request.json['server_workspace_id']
 
+    # removing the poetry cache for the workspace
+
+    try:
+        os.system("chmod +x clear_poetry_env.sh")
+        os.system("./clear_poetry.sh "+ workspace_data_path+"/"+id+"/"+"pyproject.toml")
+    except Exection as e:
+        return jsonify({"error": str(e)}), 500
+
     try:
         os.system("rm -rf "+workspace_data_path+"/"+id)
     except Exception as e:

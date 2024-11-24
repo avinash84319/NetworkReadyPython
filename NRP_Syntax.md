@@ -80,20 +80,78 @@ But,
 
 ### $$variable_name :- 
 - This is the variable which will be split across the remote machines to execute parallel operation on this variable.
-- There should be only one of this variable
+- There can be multiple variables of this type
 - After $$ part the variable_name must follow python conventions
 - This must be a List,Numpy array or Pandas dataframe only ( other distributable types comming soon)
 
 ### ??variable_name :-
 - This is the variable used to pass information between blocks, this will not be distributed among remote machines but will be sent to all remote machine with same value as in previous block.
-- There should be only one of this variable
+- There can be multiple variables of this type
 - After ?? part the variable_name must follow python conventions
 - This can be anything which python supports and must be serializable by pickle.
-- use jsons to pass multiple values ( suggestion )
 
 ### Normal python variables :-
 - These will have same scope as python gives but only inside one block
 - These variables cannot be accessed in other blocks ( use ?? variables for that )
+
+## Looping 
+
+This tool was made keeping in mind Machine Learning and it needs looping the training process.
+
+we can loop any pair of sequential and parallel blocks and the no of times the blocks to be looped must specified after the block tokens
+
+for example :- 
+
+```
+---3
+#some seq code
+---
+
+# can include multiple blocks in between
+
+|||
+#some par code
+|||3
+
+```
+
+The no of times the loop runs must be specified in first and last block,but
+
+1. The first block must be sequential block
+2. The last block must be parallel block
+
+This looping feature also supports recursional looping,that means there can be loops inside loops .
+
+for example :- 
+
+```
+---3
+#some seq code
+---
+
+|||
+# par code 2
+|||
+
+---2
+# seq code 2
+---
+
+|||
+# par code 3
+|||2
+
+---
+# seq code 3
+---
+
+|||
+#some par code
+|||3
+
+```
+
+So , in this example the seq code 2 and par code 3 will be run 6 times total, that is everytime outer loop run the inner loop runs for 2 times .
 
 ## Example NRP txt file
 
@@ -131,7 +189,7 @@ $$a=np.array([x*??b for x in $$a])
 ??b=??b*2                        #value of ??b will be 4
 |||
 
----
+---3                             # this will runt the blocks 3 times
 # this is a sequential code
 $$a=np.array([x*??b for x in $$a])
 ??b=??b*2                        #value of ??b will be 8
@@ -140,7 +198,7 @@ $$a=np.array([x*??b for x in $$a])
 |||
 # this is a parallel code
 $$a=np.array([x*??b for x in $$a])
-|||
+|||3
 
 ---
 # this is a sequential code
@@ -151,7 +209,9 @@ print("done")
 
 This is example showing distributed big array multiplication, althoug a single machine can easily handle this but as the array grows bigger NRP could solve the compute problem with distributed multiplcation on remote machines.
 
-This same idea can be used for distributing other things like Ml models or Dataset processing over different remote machine, although there might be network overhead and serialization problems, we will try to incorporate more Ml related examples in next release.
+This same idea can be used for distributing other things like Ml models or Dataset processing over different remote machine, although there might be network overhead and serialization problems.
+
+This is an example NRP file for training a model distributed on 3 machines :- [ML example](Examples/ml_example.txt)
 
 
 

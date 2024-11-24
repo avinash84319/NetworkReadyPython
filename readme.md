@@ -31,14 +31,7 @@ NRP uses multiple other tools to implement the project
 
 Note ! :- Currently this supports only linux environment ( windows support coming soon )
 
-Note ! :- Use virtual machines as much as possible if you dont know the code biegn executed by the server for safety . ( server can run code recieved from other users if ipaddress and ports are known)
-
-## Config.json
-
-- redis :- information for redis server
-- user_workspace :- where user project directory is present
-- serve_workspcae :- where server creates required files when running code
-- compiler_workspace :- where compiler creates and stores important code files for it to run
+Note ! :- Use virtual machines as much as possible if you dont know the code bieng executed by the server for safety . ( server can run code recieved from other users if ipaddress and ports are known)
 
 ## Redis server ( install anywhere )
 
@@ -79,6 +72,14 @@ Install [Redis]
     flask --app servernode.py run --port 5000
     ```
 This will create a flask server on the current machine which can accept distributed code to be run on this machine. ( do this wherever you want to run distributed code )
+
+## Config.json
+
+- redis :- information for redis server
+- user_workspace :- where user project directory is present
+- serve_workspcae :- where server creates required files when running code
+- compiler_workspace :- where compiler creates and stores important code files for it to run
+- rerun :- This if set `True` deletes the workspaces created at the remote servers , if set `False` the workspaces will be reused and not reflect new changes , but is better for storage and latency since new wrokspaces and packages are not installed every time.
 
 ## Usage ( compiler at main machine )
 

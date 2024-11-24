@@ -22,13 +22,7 @@ import tensorflow as tf
 X_train = tf.keras.datasets.mnist.load_data()[0][0]
 Y_train = tf.keras.datasets.mnist.load_data()[0][1]
 
-
-# 60000, 28, 28 into 3 batches of 20000, 28, 28
-
-X_train = np.array_split(X_train, 3)
-Y_train = np.array_split(Y_train, 3)
-
-$$batches = [ (X_train[i], Y_train[i]) for i in range(3) ]
+$$batches = [ (x,y) for x,y in zip(X_train,Y_train)]
 
 #model defination
 
@@ -46,8 +40,8 @@ model = tf.keras.models.Sequential([
 
 |||
 
-X_train = $$batches[0][0]
-Y_train = $$batches[0][1]
+X_train = [ train_set[0] in for train_set in $$batches ]
+Y_train = [ train_set[1] in for train_set in $$batches ]
 
 #mini_batch = 32
 #
@@ -83,8 +77,8 @@ $$gradients = gradients
 
 |||
 
-X_train = $$batches[0][0]
-Y_train = $$batches[0][1]
+X_train = [ train_set[0] in for train_set in $$batches ]
+Y_train = [ train_set[1] in for train_set in $$batches ]
 
 #mini_batch = 32
 #

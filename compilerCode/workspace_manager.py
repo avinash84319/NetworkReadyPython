@@ -208,6 +208,9 @@ def save_workspace_ids(server_workspace_ids):
 
     path = workspace_data_path+"/server_workspace_ids.json"
 
+    if not os.path.exists(workspace_data_path):
+        os.mkdir(workspace_data_path)
+
     with open(path,"w") as f:
         f.write(json.dumps(server_workspace_ids))
 

@@ -15,7 +15,7 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["poetry","run","python3","servernode.py"]
+CMD ["poetry","run","python","servernode.py"]
 
 
 

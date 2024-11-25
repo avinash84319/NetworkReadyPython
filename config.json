@@ -14,7 +14,7 @@
         "path":"/workspaces/server_workspace"
     },
     "compiler_workspace":{
-        "path2":"/home/avinash/workspaces/compilerworkspaces/",
+        "path2":"/home/avinash/workspaces/compilerworkspaces",
         "path":"/workspaces/compiler_workspace"
     },
     "rerun":"False"

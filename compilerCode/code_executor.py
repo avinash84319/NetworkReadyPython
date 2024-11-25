@@ -3,16 +3,15 @@ This module is responsible for executing the code in different modes.
 """
 from compilerCode import workspace_manager
 
+import os
 import json
 import requests
 import concurrent.futures
+from dotenv import load_dotenv
 
-# read config json
-with open("config.json","r") as f:
-    config_json=f.read()
-config_json=json.loads(config_json)
+load_dotenv()
 
-workspace_data_path=config_json['compiler_workspace']['path']
+workspace_data_path=os.getenv("COMPILER_WORKSPACE_PATH")
 
 def seq_code_execute(r):
     """
@@ -22,7 +21,7 @@ def seq_code_execute(r):
     """
 
     # executing the code
-    exec("".join(open(workspace_data_path+'seq_cd/seq_code.py').read()),{})
+    exec("".join(open(workspace_data_path+"/"+'seq_cd/seq_code.py').read()),{})
 
     return None
 

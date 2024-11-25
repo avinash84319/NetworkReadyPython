@@ -6,13 +6,11 @@ from compilerCode import tokenizer
 
 import os
 import json
+from dotenv import load_dotenv
 
-# read config json
-with open("config.json","r") as f:
-    config_json=f.read()
-config_json=json.loads(config_json)
+load_dotenv()
 
-workspace_data_path=config_json['compiler_workspace']['path']
+workspace_data_path=os.getenv("COMPILER_WORKSPACE_PATH")
 
 def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts,redis_string):
 
@@ -32,11 +30,11 @@ def seq_code_generator(r,tokens,seq_dollar_variables,seq_underscore_variables,im
 
     tokens=tokenizer.remove_compiler_tokens_from_variables(tokens)
 
-    if not os.path.exists(workspace_data_path+'seq_cd'):
-        os.makedirs(workspace_data_path+'seq_cd')
+    if not os.path.exists(workspace_data_path+"/"+'seq_cd'):
+        os.makedirs(workspace_data_path+"/"+'seq_cd')
 
     # writing the code to a file to execute
-    with open(workspace_data_path+'seq_cd/seq_code.py', 'w',encoding='utf-8') as file:
+    with open(workspace_data_path+"/"+'seq_cd/seq_code.py', 'w',encoding='utf-8') as file:
 
         # writing the import statements
         file.write(imports_packages+"\n")
@@ -92,8 +90,8 @@ def par_code_generator(tokens,par_dollar_variables,par_underscore_variables,impo
 
     tokens=tokenizer.remove_compiler_tokens_from_variables(tokens)
 
-    if not os.path.exists(workspace_data_path+'par_cd'):
-        os.makedirs(workspace_data_path+'par_cd')
+    if not os.path.exists(workspace_data_path+"/"+'par_cd'):
+        os.makedirs(workspace_data_path+"/"+'par_cd')
     
     for no in range(no_of_hosts):
 

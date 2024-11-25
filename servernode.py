@@ -2,19 +2,17 @@ from flask import Flask, request, jsonify
 import uuid
 import os
 import json
+from dotenv import load_dotenv, dotenv_values
 
 import compilerCode.code_executor as code_executor
 import compilerCode.environment_setup as environment_setup
 import compilerCode.workspace_manager as workspace_manager
 
+load_dotenv()
+
 app = Flask(__name__)
 
-# read config json
-with open("config.json","r") as f:
-    config_json=f.read()
-config_json=json.loads(config_json)
-
-workspace_data_path=config_json['server_workspace']['path']
+workspace_data_path=os.getenv("SERVER_WORKSPACE_PATH")
 
 if not os.path.exists(workspace_data_path):
     os.makedirs(workspace_data_path)

@@ -6,13 +6,11 @@ This module will contain all the functions to handle the workspace in hosts
 import os
 import requests
 import json
+from dotenv import load_dotenv
 
-# read config json
-with open("config.json","r") as f:
-    config_json=f.read()
-config_json=json.loads(config_json)
+load_dotenv()
 
-workspace_data_path=config_json['compiler_workspace']['path']
+workspace_data_path=os.getenv("COMPILER_WORKSPACE_PATH")
 
 def send_workspace_to_hosts(hosts,workspace_path):
     """

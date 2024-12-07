@@ -5,6 +5,7 @@ from compilerCode import workspace_manager
 
 import os
 import json
+import requests
 import concurrent.futures
 from dotenv import load_dotenv
 

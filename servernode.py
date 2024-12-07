@@ -4,6 +4,7 @@ import os
 import json
 from functools import wraps
 from dotenv import load_dotenv, dotenv_values
+import redis
 
 import compilerCode.code_executor as code_executor
 import compilerCode.environment_setup as environment_setup
@@ -191,4 +192,15 @@ def check_workspace():
 
 
 if __name__ == "__main__":
+
+    # check the redis server
+    try:
+        print("Connecting to redis server on", os.getenv("REDIS_SERVER_HOST"), os.getenv("REDIS_SERVER_PORT"))
+        r = redis.Redis(host=os.getenv("REDIS_SERVER_HOST"), port=os.getenv("REDIS_SERVER_PORT"), db=0)
+        r.ping()
+        print("Redis server is running")
+    except Exception as e:
+        print(f"Error occurred while connecting to redis server: {str(e)}")
+        exit(1)
+
     app.run(host="0.0.0.0")

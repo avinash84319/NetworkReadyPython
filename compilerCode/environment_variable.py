@@ -1,3 +1,8 @@
+"""
+Module related to environment variables needed for the compiler
+"""
+
+
 from dotenv import load_dotenv
 import os
 

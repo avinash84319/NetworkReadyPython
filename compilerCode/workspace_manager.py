@@ -5,6 +5,7 @@ This module will contain all the functions to handle the workspace in hosts
 
 import os
 import json
+import requests
 from dotenv import load_dotenv
 
 from compilerCode import communication

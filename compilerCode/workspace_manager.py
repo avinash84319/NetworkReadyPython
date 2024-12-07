@@ -4,9 +4,10 @@ This module will contain all the functions to handle the workspace in hosts
 
 
 import os
-import requests
 import json
 from dotenv import load_dotenv
+
+from compilerCode import communication
 
 load_dotenv()
 
@@ -28,7 +29,7 @@ def send_workspace_to_hosts(hosts,workspace_path):
 
     for no,host in enumerate(hosts):
         try:
-            response = requests.post(f"{host}/workspace",json=workspace_json)
+            response = communication.post(f"{host}/workspace",json=workspace_json)
             if response.status_code == 200:
                 print(f"Workspace created successfully at {host}")
                 ids[host]=response.json()["id"]
@@ -125,7 +126,7 @@ def setup_environment(hosts,path_to_req,server_workspace_ids):
     # check if requirments already installed
     for no,host in enumerate(hosts):
         try:
-            response = requests.get(f"{host}/workspace/install/check",json={"server_workspace_id":server_workspace_ids[host]})
+            response = communication.get(f"{host}/workspace/install/check",json={"server_workspace_id":server_workspace_ids[host]})
             if response.status_code == 200:
                 packages_installed=True
                 print(f"Packages already installed at {host}")
@@ -141,7 +142,7 @@ def setup_environment(hosts,path_to_req,server_workspace_ids):
 
         for no,host in enumerate(hosts):
             try:
-                response = requests.post(f"{host}/workspace/install",json={"req_file":open(path_to_req).read(),"server_workspace_id":server_workspace_ids[host]})
+                response = communication.post(f"{host}/workspace/install",json={"req_file":open(path_to_req).read(),"server_workspace_id":server_workspace_ids[host]})
                 if response.status_code == 200:
                     print(f"Packages installed successfully at {host}")
                 elif response.status_code == 500:
@@ -168,7 +169,7 @@ def delete_workspace_in_hosts(hosts,server_workspace_ids):
 
     for no,host in enumerate(hosts):
         try:
-            response = requests.post(f"{host}/workspace/delete",json={"server_workspace_id":server_workspace_ids[host]})
+            response = communication.post(f"{host}/workspace/delete",json={"server_workspace_id":server_workspace_ids[host]})
             if response.status_code == 200:
                 print(f"Workspace deleted successfully at {host}")
             elif response.status_code == 500:
@@ -238,7 +239,7 @@ def get_workspace_ids_from_file_or_hosts(hosts,workspace_path):
         # if not present, then just remove the workspace id from the dict, the workspace will be sent again in next block
         for host in server_workspace_ids.keys():
             try:
-                response = requests.get(f"{host}/workspace/check",json={"server_workspace_id":server_workspace_ids[host]})
+                response = communication.get(f"{host}/workspace/check",json={"server_workspace_id":server_workspace_ids[host]})
                 if response.status_code == 200:
                     response_json = response.json()
                     if response_json.get("workspace_present"):

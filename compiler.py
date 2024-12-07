@@ -16,10 +16,11 @@ import compilerCode.code_verifier as code_verifier
 import compilerCode.variable_handler as variable_handler
 import compilerCode.environment_setup as environment_setup
 import compilerCode.workspace_manager as workspace_manager
+import compilerCode.environment_variable as environment_variable
 
 load_dotenv()
 
-def compile_run(code,r,path_to_workspace,redis_string,rerun):
+def compile_run(code,r,path_to_workspace,redis_string,rerun,delete):
 
     """ 
     This function will compile the given code and run it.
@@ -27,6 +28,8 @@ def compile_run(code,r,path_to_workspace,redis_string,rerun):
             r: redis object: redis object
             path_to_workspace: str: path to the usrs workspace where the code is present
             redis_string: str:it is redis code to be added to the seq and par codes
+            rerun: bool: if the workspaces are to be reused
+            delete: bool: if the workspaces are to be deleted
     """
 
     # removing comments from the code
@@ -148,7 +151,7 @@ def compile_run(code,r,path_to_workspace,redis_string,rerun):
         # removing the installed packages
         # environment_setup.compile_remove_packages(path_to_req)      #until development same directory is used
 
-    if not rerun:
+    if delete:
 
         print("Deleting the workspaces in the hosts")
     
@@ -157,12 +160,15 @@ def compile_run(code,r,path_to_workspace,redis_string,rerun):
 
     else:
 
-        print(f"Workspaces are not deleted since rerun is set to {rerun}")
+        print(f"Workspaces are not deleted since delete is set to {delete}")
 
 if __name__ == "__main__":
     print("Compiler started")
 
     load_dotenv()
+
+    # check if the required environment variables are set
+    environment_variable.environment_variable()
 
     #redis
     red = redis.Redis(host=os.getenv("REDIS_COMPILER_HOST"), port=os.getenv("REDIS_COMPILER_PORT"), db=os.getenv("REDIS_COMPILER_DB"))
@@ -178,5 +184,8 @@ if __name__ == "__main__":
     # This is useful when the code is to be rerun multiple times, and the workspaces are not to be deleted
     rerun = True if os.getenv("RERUN") == "True" else False
 
-    compile_run(input_file,red,path_to_workspace,redis_string,rerun)
+    # Delete the workspaces in the hosts configured in the .env file
+    delete = True if os.getenv("DELETE") == "True" else False
+
+    compile_run(input_file,red,path_to_workspace,redis_string,rerun,delete)
     

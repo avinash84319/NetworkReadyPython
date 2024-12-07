@@ -5,17 +5,17 @@
         "db":0
     },
     "user_workspace":{
-        "path2":"/home/avinash/development/ReddyNet_V2.0/user_workspace",
-        "path":"/workspaces/NetworkReadyPython/user_workspace",
+        "path":"/home/avinash/development/ReddyNet_V2.0/user_workspace",
+        "path2":"/workspaces/NetworkReadyPython/user_workspace",
         "nrp_file":"input.txt"
     },
     "server_workspace":{
-        "path2":"/home/avinash/workspaces/serverworkspaces",
-        "path":"/workspaces/server_workspace"
+        "path":"/home/avinash/workspaces/serverworkspaces",
+        "path2":"/workspaces/server_workspace"
     },
     "compiler_workspace":{
-        "path2":"/home/avinash/workspaces/compilerworkspaces",
-        "path":"/workspaces/compiler_workspace"
+        "path":"/home/avinash/workspaces/compilerworkspaces",
+        "path2":"/workspaces/compiler_workspace"
     },
     "rerun":"False"
 }

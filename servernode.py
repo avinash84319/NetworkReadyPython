@@ -62,7 +62,7 @@ def delete_workspace():
 
     try:
         os.system("chmod +x clear_poetry_env.sh")
-        os.system("./clear_poetry.sh "+ workspace_data_path+"/"+id+"/"+"pyproject.toml")
+        os.system("./clear_poetry_env.sh "+ workspace_data_path+"/"+id+"/user_workspace/"+"pyproject.toml")
     except Exection as e:
         return jsonify({"error": str(e)}), 500
 

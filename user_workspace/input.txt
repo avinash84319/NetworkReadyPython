@@ -7,7 +7,7 @@
 
 >>>
 #this will be the path to the requirments.txt file in relative
-#/workspaces/ReddyNet_V2.0/reqfake.txt
+#/workspaces/NetworkReadyPython/reqfake.txt
 /home/avinash/development/ReddyNet_V2.0/reqfake.txt
 >>>
 

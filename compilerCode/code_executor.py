@@ -3,16 +3,17 @@ This module is responsible for executing the code in different modes.
 """
 from compilerCode import workspace_manager
 
+import os
 import json
 import requests
 import concurrent.futures
+from dotenv import load_dotenv
 
-# read config json
-with open("config.json","r") as f:
-    config_json=f.read()
-config_json=json.loads(config_json)
+from compilerCode import communication
 
-workspace_data_path=config_json['compiler_workspace']['path']
+load_dotenv()
+
+workspace_data_path=os.getenv("COMPILER_WORKSPACE_PATH")
 
 def seq_code_execute(r):
     """
@@ -22,7 +23,7 @@ def seq_code_execute(r):
     """
 
     # executing the code
-    exec("".join(open(workspace_data_path+'seq_cd/seq_code.py').read()),{})
+    exec("".join(open(workspace_data_path+"/"+'seq_cd/seq_code.py').read()),{})
 
     return None
 
@@ -42,7 +43,7 @@ def server_par_code_executor(hosts,path_to_req,r,server_workspace_ids):
     # executing the code on hosts concurrently by sending the par files to the hosts
     
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = [executor.submit(requests.post,f"{host}/execute",json={'code_file':open(workspace_data_path+f'par_cd/par_code_{i}.py').read(),"server_workspace_id":server_workspace_ids[host]}) for i,host in enumerate(hosts)]
+        results = [executor.submit(communication.post,f"{host}/execute",json={'code_file':open(workspace_data_path+f'par_cd/par_code_{i}.py').read(),"server_workspace_id":server_workspace_ids[host]}) for i,host in enumerate(hosts)]
         
         # checking the results
         for f in concurrent.futures.as_completed(results):
@@ -81,7 +82,7 @@ def server_par_code_executor(hosts,path_to_req,r,server_workspace_ids):
                     print(f"Trying second pass for {host}'s code in {new_host}") 
                     # send the code to the new host
                     try:
-                        requests.post(f"{new_host}/execute",json={'code_file':open(workspace_data_path+f'par_cd/par_code_{no}.py').read(),"server_workspace_id":server_workspace_ids[host]})
+                        communication.post(f"{new_host}/execute",json={'code_file':open(workspace_data_path+f'par_cd/par_code_{no}.py').read(),"server_workspace_id":server_workspace_ids[host]})
                     except requests.exceptions.HTTPError as errh:
                         print(f"HTTP Error occurred: {errh} at {new_host}")
                     except requests.exceptions.ConnectionError as errc:

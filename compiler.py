@@ -5,6 +5,9 @@ import os
 import json
 import sys
 import redis
+from dotenv import load_dotenv
+
+
 import compilerCode.code_handler as code_handler
 import compilerCode.tokenizer as tokenizer
 import compilerCode.code_generator as code_generator
@@ -13,8 +16,11 @@ import compilerCode.code_verifier as code_verifier
 import compilerCode.variable_handler as variable_handler
 import compilerCode.environment_setup as environment_setup
 import compilerCode.workspace_manager as workspace_manager
+import compilerCode.environment_variable as environment_variable
 
-def compile_run(code,r,path_to_workspace,redis_string,rerun):
+load_dotenv()
+
+def compile_run(code,r,path_to_workspace,redis_string,rerun,delete):
 
     """ 
     This function will compile the given code and run it.
@@ -22,6 +28,8 @@ def compile_run(code,r,path_to_workspace,redis_string,rerun):
             r: redis object: redis object
             path_to_workspace: str: path to the usrs workspace where the code is present
             redis_string: str:it is redis code to be added to the seq and par codes
+            rerun: bool: if the workspaces are to be reused
+            delete: bool: if the workspaces are to be deleted
     """
 
     # removing comments from the code
@@ -91,8 +99,8 @@ def compile_run(code,r,path_to_workspace,redis_string,rerun):
         # generating the sequential code
         code_generator.seq_code_generator(r,seq_tokens,seq_dollar_variables,seq_underscore_variables,imports_packages,hosts,redis_string)
 
-        # installing the required packages
-        environment_setup.compile_install_packages(path_to_req)      #until development same directory is used
+        # # installing the required packages
+        # environment_setup.compile_install_packages(path_to_req)      #until development same directory is used
 
         # executing the sequential code
         code_executor.seq_code_execute(r)
@@ -143,7 +151,7 @@ def compile_run(code,r,path_to_workspace,redis_string,rerun):
         # removing the installed packages
         # environment_setup.compile_remove_packages(path_to_req)      #until development same directory is used
 
-    if not rerun:
+    if delete:
 
         print("Deleting the workspaces in the hosts")
     
@@ -152,22 +160,21 @@ def compile_run(code,r,path_to_workspace,redis_string,rerun):
 
     else:
 
-        print(f"Workspaces are not deleted since rerun is set to {rerun}")
+        print(f"Workspaces are not deleted since delete is set to {delete}")
 
 if __name__ == "__main__":
     print("Compiler started")
 
-    # read config json
-    with open("config.json","r") as f:
-        config_json=f.read()
+    load_dotenv()
 
-    config_json=json.loads(config_json)
+    # check if the required environment variables are set
+    environment_variable.environment_variable()
 
     #redis
-    red = redis.Redis(host=config_json['redis']['host'], port=config_json['redis']['port'], db=config_json['redis']['db'])
-    path_to_workspace=config_json['user_workspace']['path']
-    input_file=config_json['user_workspace']['nrp_file']
-    redis_string=f'r = redis.Redis(host="{config_json["redis"]["host"]}", port="{config_json["redis"]["port"]}")\n'
+    red = redis.Redis(host=os.getenv("REDIS_COMPILER_HOST"), port=os.getenv("REDIS_COMPILER_PORT"), db=os.getenv("REDIS_COMPILER_DB"))
+    path_to_workspace=os.getenv("USER_WORKSPACE_PATH")
+    input_file=os.getenv("USER_WORKSPACE_NRP_FILE")
+    redis_string=f'r = redis.Redis(host="{os.getenv("REDIS_COMPILER_HOST")}", port="{os.getenv("REDIS_COMPILER_PORT")}")\n'
 
     # Read the input file
     with open(path_to_workspace+"/"+input_file, 'r',encoding='utf-8') as file:
@@ -175,7 +182,10 @@ if __name__ == "__main__":
 
     # config['rerun'] is set to True if the workspaces are to be reused
     # This is useful when the code is to be rerun multiple times, and the workspaces are not to be deleted
-    rerun = True if config_json['rerun']=="True" else False
+    rerun = True if os.getenv("RERUN") == "True" else False
 
-    compile_run(input_file,red,path_to_workspace,redis_string,rerun)
+    # Delete the workspaces in the hosts configured in the .env file
+    delete = True if os.getenv("DELETE") == "True" else False
+
+    compile_run(input_file,red,path_to_workspace,redis_string,rerun,delete)
     

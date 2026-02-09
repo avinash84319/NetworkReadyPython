@@ -1,36 +1,21 @@
-# Use Ubuntu as the base image
-FROM ubuntu:22.04
+# Useing redis
+FROM python:3.11.10-bullseye
+ 
+# update all the repos
+RUN apt-get update -q &&\
+    apt-get upgrade -q -y
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    POETRY_HOME=/opt/poetry \
-    PATH="/opt/poetry/bin:$PATH"
+RUN pip install poetry
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.11 python3.11-venv python3-pip \
-    redis-server \
-    curl \
-    bash \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY pyproject.toml .
 
-# Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3.11 -
+RUN poetry install
 
-# Set working directory
-WORKDIR /app
-
-# Copy project files
-COPY pyproject.toml poetry.lock ./
-
-# Install dependencies using Poetry
-RUN poetry install --no-root
-
-# Copy the rest of the application
 COPY . .
 
-# expose flask server port 5000
 EXPOSE 5000
 
-CMD flask --app server.py run
+CMD ["poetry","run","python","servernode.py"]
+
+
 

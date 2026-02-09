@@ -2,45 +2,66 @@ from flask import Flask, request, jsonify
 import uuid
 import os
 import json
+from functools import wraps
+from dotenv import load_dotenv, dotenv_values
+import redis
 
 import compilerCode.code_executor as code_executor
 import compilerCode.environment_setup as environment_setup
 import compilerCode.workspace_manager as workspace_manager
 
+load_dotenv()
+
 app = Flask(__name__)
 
-# read config json
-with open("config.json","r") as f:
-    config_json=f.read()
-config_json=json.loads(config_json)
-
-workspace_data_path=config_json['server_workspace']['path']
+workspace_data_path = os.getenv("SERVER_WORKSPACE_PATH")
 
 if not os.path.exists(workspace_data_path):
     os.makedirs(workspace_data_path)
     print("Server workspace directory created")
+
+
+def authenticate(f):
+    """Decorator to check for user-token and user-id in headers."""
     
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user_token = request.headers.get("user-token")
+        user_id = request.headers.get("user-id")
+        
+        # Replace this logic with your actual token and user ID validation
+        if not user_token or not user_id or not validate_user(user_token, user_id):
+            return jsonify({"message": "Access denied"}), 401
+
+        return f(*args, **kwargs)
+    
+    return decorated_function
+
+
+def validate_user(user_token, user_id):
+    """Validate the user-token and user-id.
+    Replace with actual validation logic, such as database or cache lookup."""
+    # Example dummy validation
+    return user_token == os.getenv("USER_TOKEN") and user_id == os.getenv("USER_ID")
+
 
 @app.route("/")
+@authenticate
 def home():
     return "ReddyNet server at your service!"
 
+
 @app.route("/workspace", methods=["POST"])
+@authenticate
 def workspace():
-    """
-    This function will create the workspace for the server
-    inputs: workspace_json: dict: json containing the workspace information
-    outputs: message: str: message of the workspace creation
-    """
     workspace_json = request.json
     path_to_save = workspace_data_path
 
     if not os.path.exists(path_to_save):
         os.makedirs(path_to_save)
 
-    #creating the id for the workspace
+    # Create the id for the workspace
     id = str(uuid.uuid4())
-
     path_to_save = path_to_save + "/" + id
 
     try:
@@ -51,72 +72,59 @@ def workspace():
 
     return jsonify({"message": "Workspace created successfully", "id": id})
 
-@app.route("/workspace/delete", methods=["POST"])
-def delete_workspace():
-    """
-    This function will delete the workspace for the server
-    inputs: id: str: id of the workspace
-    outputs: message: str: message of the workspace deletion
-    """
-    id = request.json['server_workspace_id']
 
-    # removing the poetry cache for the workspace
+@app.route("/workspace/delete", methods=["POST"])
+@authenticate
+def delete_workspace():
+    id = request.json['server_workspace_id']
 
     try:
         os.system("chmod +x clear_poetry_env.sh")
-        os.system("./clear_poetry.sh "+ workspace_data_path+"/"+id+"/"+"pyproject.toml")
-    except Exection as e:
+        os.system("./clear_poetry_env.sh " + workspace_data_path + "/" + id + "/user_workspace/" + "pyproject.toml")
+    except Exception as e:
         return jsonify({"error": str(e)}), 500
 
     try:
-        os.system("rm -rf "+workspace_data_path+"/"+id)
+        os.system("rm -rf " + workspace_data_path + "/" + id)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
     return jsonify({"message": "Workspace deleted successfully"})
 
-@app.route("/workspace/install/check", methods=["GET"])
-def check_install():
-    """
-    This function will check if the packages are installed for the workspace
-    inputs: id: str: id of the workspace
-    outputs: message: str: message of the installation
-    """
 
+@app.route("/workspace/install/check", methods=["GET"])
+@authenticate
+def check_install():
     id = request.json['server_workspace_id']
 
-    # check directory of user workspace
-    user_workspace = os.listdir(workspace_data_path+"/"+id)[0]
+    # Check directory of user workspace
+    user_workspace = os.listdir(workspace_data_path + "/" + id)[0]
 
-    if not os.path.exists(workspace_data_path+"/"+id+"/"+user_workspace+"/pyproject.toml"):
+    if not os.path.exists(workspace_data_path + "/" + id + "/" + user_workspace + "/pyproject.toml"):
         return jsonify({"message": "Packages not installed"}), 500
 
     return jsonify({"message": "Packages installed"}), 200
 
-@app.route("/workspace/install", methods=["POST"])
-def install():
-    """
-    This function will install the packages for the workspace
-    inputs: id: str: id of the workspace
-    outputs: message: str: message of the installation
-    """
 
+@app.route("/workspace/install", methods=["POST"])
+@authenticate
+def install():
     try:
         req_file = request.json['req_file']
         id = request.json['server_workspace_id']
 
-        if not os.path.exists(workspace_data_path+"/"+id):
-            os.makedirs(workspace_data_path+"/"+id)
+        if not os.path.exists(workspace_data_path + "/" + id):
+            os.makedirs(workspace_data_path + "/" + id)
 
-        # check directory of user workspace
-        user_workspace = os.listdir(workspace_data_path+"/"+id)[0]
+        # Check directory of user workspace
+        user_workspace = os.listdir(workspace_data_path + "/" + id)[0]
 
-        # write the req_file to the req.txt
-        with open(workspace_data_path+"/"+id+"/"+user_workspace+"/req.txt", "w") as file:
+        # Write the req_file to the req.txt
+        with open(workspace_data_path + "/" + id + "/" + user_workspace + "/req.txt", "w") as file:
             file.write(req_file)
 
-        # setting up the environment
-        environment_setup.server_install_packages(workspace_data_path+"/"+id+"/"+user_workspace+"/req.txt")
+        # Setting up the environment
+        environment_setup.server_install_packages(workspace_data_path + "/" + id + "/" + user_workspace + "/req.txt")
 
         return jsonify({"message": "Packages installed successfully"})
     
@@ -125,75 +133,74 @@ def install():
 
 
 @app.route("/execute", methods=["POST"])
+@authenticate
 def execute():
-
-    """
-    This function will execute the received code.
-    imputs: code_file (file): file containing the code to be executed
-    outputs: message: str: message of the execution
-    """
-    
     code = request.json['code_file']
     id = request.json['server_workspace_id']
 
-    # write the code to the file
-    if not os.path.exists(workspace_data_path+"/"+id):
-        os.makedirs(workspace_data_path+"/"+id)
+    # Write the code to the file
+    if not os.path.exists(workspace_data_path + "/" + id):
+        os.makedirs(workspace_data_path + "/" + id)
 
-    # check directory of user workspace
-    user_workspace = os.listdir(workspace_data_path+"/"+id)[0]
+    # Check directory of user workspace
+    user_workspace = os.listdir(workspace_data_path + "/" + id)[0]
 
-    with open(workspace_data_path+"/"+id+"/"+user_workspace+"/parcode.py", "w") as file:
+    with open(workspace_data_path + "/" + id + "/" + user_workspace + "/parcode.py", "w") as file:
         file.write(code)
 
     try:
-        # write the deserializer code file inside the workspace
-        deseriazer_code=""
+        # Write the deserializer code file inside the workspace
+        deseriazer_code = ""
         with open("compilerCode/data_serializer.py") as file:
-            deseriazer_code=file.read()
+            deseriazer_code = file.read()
 
-        if not os.path.exists(workspace_data_path+"/"+id+"/"+user_workspace+"/compilerCode"):
-            os.makedirs(workspace_data_path+"/"+id+"/"+user_workspace+"/compilerCode")
+        if not os.path.exists(workspace_data_path + "/" + id + "/" + user_workspace + "/compilerCode"):
+            os.makedirs(workspace_data_path + "/" + id + "/" + user_workspace + "/compilerCode")
 
-        with open(workspace_data_path+"/"+id+"/"+user_workspace+"/compilerCode/data_serializer.py", "w") as file:
+        with open(workspace_data_path + "/" + id + "/" + user_workspace + "/compilerCode/data_serializer.py", "w") as file:
             file.write(deseriazer_code)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
     try:
-    # create a sh script to execute the code
-        with open(workspace_data_path+"/"+id+"/"+user_workspace+"/execute.sh", "w") as file:
-            file.write("cd "+workspace_data_path+"/"+id+"/"+user_workspace+"\n")
+        # Create a sh script to execute the code
+        with open(workspace_data_path + "/" + id + "/" + user_workspace + "/execute.sh", "w") as file:
+            file.write("cd " + workspace_data_path + "/" + id + "/" + user_workspace + "\n")
             file.write("poetry run python parcode.py")
         
-        # execute the code
-        os.system("sh "+workspace_data_path+"/"+id+"/"+user_workspace+"/execute.sh")
+        # Execute the code
+        os.system("sh " + workspace_data_path + "/" + id + "/" + user_workspace + "/execute.sh")
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-    # removing the installed packages
-    # environment_setup.server_remove_packages(workspace_data_path+"/"+id+"/"+user_workspace+"/req.txt")  #while development same directory is used
-    
     return jsonify({"message": "Code executed successfully"})
 
+
 @app.route("/workspace/check", methods=["GET"])
+@authenticate
 def check_workspace():
-    """
-    This function will check if the workspace exists
-    inputs: id: str: id of the workspace
-    outputs: message: str: message of the workspace existence
-    """
     id = request.json['server_workspace_id']
 
     if not os.path.exists(workspace_data_path):
         print("Server workspace directory does not exist")
         return jsonify({"error": "Server path does not exist"}), 500
 
-    if not os.path.exists(workspace_data_path+"/"+id):
+    if not os.path.exists(workspace_data_path + "/" + id):
         return jsonify({"workspace_present": False}), 200
 
-    return jsonify({"workspace_present": True}), 200    
+    return jsonify({"workspace_present": True}), 200
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    # check the redis server
+    try:
+        print("Connecting to redis server on", os.getenv("REDIS_SERVER_HOST"), os.getenv("REDIS_SERVER_PORT"))
+        r = redis.Redis(host=os.getenv("REDIS_SERVER_HOST"), port=os.getenv("REDIS_SERVER_PORT"), db=0)
+        r.ping()
+        print("Redis server is running")
+    except Exception as e:
+        print(f"Error occurred while connecting to redis server: {str(e)}")
+        exit(1)
+
+    app.run(host="0.0.0.0")

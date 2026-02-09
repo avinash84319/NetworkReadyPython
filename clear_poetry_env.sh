@@ -9,6 +9,9 @@ fi
 # Get the directory of the provided pyproject.toml
 PROJECT_DIR=$(dirname "$1")
 
+# print the project directory
+echo "Project directory: $PROJECT_DIR"
+
 # Change to the project directory
 cd "$PROJECT_DIR" || { echo "Error: Unable to change to project directory."; exit 1; }
 
